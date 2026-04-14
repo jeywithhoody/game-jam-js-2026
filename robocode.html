@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ROBOCODE</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f13;
+  --surface: #16161d;
+  --card-bg: #1e1e28;
+  --border: #2a2a3a;
+  --accent: #f0c040;
+  --accent2: #e05a2b;
+  --green: #4de89a;
+  --blue: #5ab4f0;
+  --red: #f05a5a;
+  --purple: #a07af0;
+  --text: #e8e8f0;
+  --muted: #666680;
+  --font-head: 'Syne', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+/* THEMES */
+body.theme-laundry { --accent:#5ab4f0; --accent2:#2b7ec8; --theme-glow: rgba(90,180,240,0.3); }
+body.theme-restaurant { --accent:#f0c040; --accent2:#e05a2b; --theme-glow: rgba(240,192,64,0.3); }
+body.theme-hospital { --accent:#4de89a; --accent2:#2bb87a; --theme-glow: rgba(77,232,154,0.3); }
+
+* { box-sizing: border-box; margin:0; padding:0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-head);
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* ── SCREENS ── */
+.screen { position: fixed; inset:0; display:none; flex-direction:column; }
+.screen.active { display:flex; }
+
+/* ════════════════════════════════
+   MENU SCREEN
+════════════════════════════════ */
+#screen-menu {
+  background: var(--bg);
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+.menu-bg {
+  position: absolute; inset:0;
+  background:
+    radial-gradient(ellipse 60% 40% at 50% 100%, rgba(240,192,64,0.08) 0%, transparent 70%),
+    repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.02) 39px, rgba(255,255,255,0.02) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.02) 39px, rgba(255,255,255,0.02) 40px);
+}
+.menu-content { position:relative; z-index:1; text-align:center; }
+.game-logo {
+  font-size: clamp(3rem,8vw,6rem);
+  font-weight: 900;
+  letter-spacing: -2px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.game-logo .ro { color: var(--text); }
+.game-logo .bo { color: var(--accent); }
+.game-logo .code { color: var(--accent2); }
+.game-tagline {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--muted);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 60px;
+}
+.theme-select-title {
+  font-size: 0.7rem;
+  letter-spacing: 4px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.theme-cards {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.theme-card {
+  width: 180px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 28px 20px;
+  cursor: pointer;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.theme-card::after {
+  content:'';
+  position:absolute; inset:0;
+  opacity:0;
+  transition: opacity 0.25s;
+  border-radius: 10px;
+}
+.theme-card.laundry::after   { background: radial-gradient(circle at 50% 100%, rgba(90,180,240,0.15), transparent 70%); }
+.theme-card.restaurant::after { background: radial-gradient(circle at 50% 100%, rgba(240,192,64,0.15), transparent 70%); }
+.theme-card.hospital::after  { background: radial-gradient(circle at 50% 100%, rgba(77,232,154,0.15), transparent 70%); }
+.theme-card:hover { transform: translateY(-6px); }
+.theme-card:hover::after { opacity:1; }
+.theme-card.laundry:hover   { border-color: #5ab4f0; box-shadow: 0 12px 40px rgba(90,180,240,0.2); }
+.theme-card.restaurant:hover { border-color: #f0c040; box-shadow: 0 12px 40px rgba(240,192,64,0.2); }
+.theme-card.hospital:hover  { border-color: #4de89a; box-shadow: 0 12px 40px rgba(77,232,154,0.2); }
+.theme-icon { font-size: 2.8rem; margin-bottom: 12px; }
+.theme-name { font-weight: 800; font-size: 1.1rem; margin-bottom: 4px; }
+.theme-desc { font-family: var(--font-mono); font-size: 0.62rem; color: var(--muted); line-height: 1.5; }
+
+/* ════════════════════════════════
+   LEVEL SELECT
+════════════════════════════════ */
+#screen-levels {
+  background: var(--bg);
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+.levels-header { text-align:center; margin-bottom:40px; position:relative; z-index:1; }
+.levels-title { font-size:2rem; font-weight:900; margin-bottom:6px; }
+.levels-theme-badge {
+  display:inline-block;
+  font-family: var(--font-mono);
+  font-size:0.65rem;
+  letter-spacing:3px;
+  padding:4px 12px;
+  border-radius:20px;
+  border:1px solid var(--accent);
+  color: var(--accent);
+  text-transform:uppercase;
+}
+.levels-grid {
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:14px;
+  max-width: 560px;
+  position:relative; z-index:1;
+}
+.level-btn {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  cursor:pointer;
+  transition: all 0.2s;
+  text-align:left;
+  position:relative;
+}
+.level-btn:hover:not(.locked) {
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px var(--theme-glow, rgba(240,192,64,0.15));
+}
+.level-btn.locked { opacity:0.35; cursor:not-allowed; }
+.level-btn.cleared { border-color: var(--green); }
+.level-num { font-family:var(--font-mono); font-size:0.65rem; color:var(--muted); margin-bottom:4px; }
+.level-name { font-weight:800; font-size:0.9rem; margin-bottom:4px; }
+.level-diff { font-family:var(--font-mono); font-size:0.6rem; }
+.level-diff.easy   { color: var(--green); }
+.level-diff.medium { color: var(--accent); }
+.level-diff.hard   { color: var(--red); }
+.level-stars { position:absolute; top:10px; right:10px; font-size:0.7rem; letter-spacing:1px; }
+.btn-back {
+  margin-top:30px;
+  background:none;
+  border:1px solid var(--border);
+  border-radius:8px;
+  color:var(--muted);
+  font-family:var(--font-head);
+  font-size:0.8rem;
+  padding:8px 20px;
+  cursor:pointer;
+  transition:all 0.2s;
+  position:relative; z-index:1;
+}
+.btn-back:hover { border-color:var(--text); color:var(--text); }
+
+/* ════════════════════════════════
+   GAME SCREEN
+════════════════════════════════ */
+#screen-game {
+  flex-direction: column;
+  background: var(--bg);
+}
+
+/* TOP BAR */
+.topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 10px 20px;
+  background: var(--surface);
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.topbar-left { display:flex; align-items:center; gap:14px; }
+.btn-icon {
+  background:none; border:1px solid var(--border); border-radius:6px;
+  color:var(--muted); width:32px; height:32px; cursor:pointer;
+  font-size:1rem; transition:all 0.2s; display:flex; align-items:center; justify-content:center;
+}
+.btn-icon:hover { border-color:var(--text); color:var(--text); }
+.level-info-title { font-weight:800; font-size:1rem; }
+.level-info-sub { font-family:var(--font-mono); font-size:0.6rem; color:var(--muted); }
+
+.topbar-center { text-align:center; }
+.mission-box {
+  background:var(--card-bg);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:6px 16px;
+  max-width:380px;
+}
+.mission-label { font-family:var(--font-mono); font-size:0.55rem; letter-spacing:3px; color:var(--muted); text-transform:uppercase; }
+.mission-text { font-size:0.82rem; font-weight:700; margin-top:1px; }
+
+.topbar-right { display:flex; align-items:center; gap:10px; }
+.btn-run {
+  background: var(--accent);
+  border: none;
+  border-radius:8px;
+  color: #000;
+  font-family: var(--font-head);
+  font-weight:800;
+  font-size:0.85rem;
+  padding:8px 22px;
+  cursor:pointer;
+  letter-spacing:1px;
+  transition:all 0.2s;
+  display:flex; align-items:center; gap:6px;
+}
+.btn-run:hover { transform:scale(1.05); box-shadow: 0 4px 20px var(--theme-glow,rgba(240,192,64,0.4)); }
+.btn-run:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+.btn-reset {
+  background:none;
+  border:1px solid var(--border);
+  border-radius:8px;
+  color:var(--muted);
+  font-family:var(--font-head);
+  font-size:0.8rem;
+  padding:8px 14px;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+.btn-reset:hover { border-color:var(--red); color:var(--red); }
+
+/* MAIN AREA */
+.game-area {
+  flex:1;
+  display:grid;
+  grid-template-columns: 200px 1fr;
+  grid-template-rows: 1fr 180px;
+  gap:0;
+  overflow:hidden;
+}
+
+/* CARD PALETTE */
+.palette {
+  grid-column:1; grid-row:1/3;
+  background: var(--surface);
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column;
+  overflow:hidden;
+}
+.palette-title {
+  padding:12px 14px 8px;
+  font-family:var(--font-mono);
+  font-size:0.6rem;
+  letter-spacing:3px;
+  color:var(--muted);
+  text-transform:uppercase;
+  border-bottom:1px solid var(--border);
+}
+.palette-list {
+  flex:1;
+  overflow-y:auto;
+  padding:10px 10px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.palette-card {
+  background:var(--card-bg);
+  border:1.5px solid var(--border);
+  border-radius:8px;
+  padding:9px 12px;
+  cursor:grab;
+  user-select:none;
+  transition:all 0.15s;
+  display:flex; align-items:center; gap:8px;
+  font-size:0.78rem;
+  font-weight:700;
+}
+.palette-card:hover { transform:translateX(3px); border-color:var(--accent); }
+.palette-card:active { cursor:grabbing; transform:scale(0.97); }
+.card-icon { font-size:1.1rem; flex-shrink:0; }
+.card-name { font-size:0.72rem; }
+.card-desc { font-family:var(--font-mono); font-size:0.55rem; color:var(--muted); margin-top:1px; }
+
+/* color coding by category */
+.palette-card.move   { border-left:3px solid var(--blue); }
+.palette-card.action { border-left:3px solid var(--accent); }
+.palette-card.logic  { border-left:3px solid var(--purple); }
+.palette-card.wait   { border-left:3px solid var(--muted); }
+
+/* SIMULATION VIEW */
+.sim-view {
+  grid-column:2; grid-row:1;
+  position:relative;
+  overflow:hidden;
+  background: linear-gradient(180deg, #0a0a10 0%, #101018 60%, #16161f 100%);
+}
+.sim-canvas { width:100%; height:100%; display:block; }
+
+/* Status overlay */
+.sim-status {
+  position:absolute; top:12px; left:50%; transform:translateX(-50%);
+  background:rgba(0,0,0,0.7);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:5px 16px;
+  font-family:var(--font-mono);
+  font-size:0.65rem;
+  letter-spacing:2px;
+  backdrop-filter:blur(4px);
+  transition:all 0.3s;
+  pointer-events:none;
+}
+.sim-status.running { border-color:var(--accent); color:var(--accent); }
+.sim-status.success { border-color:var(--green); color:var(--green); }
+.sim-status.error   { border-color:var(--red); color:var(--red); }
+
+/* TIMELINE */
+.timeline-area {
+  grid-column:2; grid-row:2;
+  background:var(--surface);
+  border-top:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.timeline-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:8px 16px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.timeline-label {
+  font-family:var(--font-mono);
+  font-size:0.6rem;
+  letter-spacing:3px;
+  color:var(--muted);
+  text-transform:uppercase;
+}
+.timeline-hint {
+  font-family:var(--font-mono);
+  font-size:0.58rem;
+  color:var(--muted);
+}
+.timeline-track {
+  flex:1;
+  display:flex;
+  align-items:center;
+  padding:0 16px;
+  gap:8px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  min-height:0;
+}
+.timeline-track::-webkit-scrollbar { height:4px; }
+.timeline-track::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+/* START NODE */
+.node-start {
+  flex-shrink:0;
+  width:48px; height:48px;
+  background:var(--surface);
+  border:2px solid var(--green);
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1rem;
+  box-shadow: 0 0 12px rgba(77,232,154,0.3);
+  color:var(--green);
+  font-weight:900;
+  font-family:var(--font-mono);
+  font-size:0.55rem;
+  letter-spacing:1px;
+}
+.node-end {
+  flex-shrink:0;
+  width:48px; height:48px;
+  background:var(--surface);
+  border:2px dashed var(--muted);
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--muted);
+  font-family:var(--font-mono);
+  font-size:0.5rem;
+  letter-spacing:1px;
+  text-align:center;
+  line-height:1.3;
+}
+
+/* CONNECTOR ARROW */
+.connector {
+  flex-shrink:0;
+  width:28px; height:2px;
+  background:var(--border);
+  position:relative;
+}
+.connector::after {
+  content:'';
+  position:absolute; right:-6px; top:-4px;
+  border:5px solid transparent;
+  border-left:7px solid var(--border);
+}
+.connector.active { background:var(--accent); }
+.connector.active::after { border-left-color:var(--accent); }
+
+/* TIMELINE CARD */
+.timeline-card {
+  flex-shrink:0;
+  background:var(--card-bg);
+  border:2px solid var(--border);
+  border-radius:10px;
+  padding:8px 12px;
+  min-width:90px;
+  max-width:110px;
+  cursor:pointer;
+  position:relative;
+  transition:all 0.2s;
+  user-select:none;
+}
+.timeline-card:hover { border-color:var(--accent); box-shadow:0 0 12px var(--theme-glow,rgba(240,192,64,0.15)); }
+.timeline-card.executing {
+  border-color:var(--accent);
+  box-shadow:0 0 16px var(--theme-glow,rgba(240,192,64,0.4));
+  animation: card-exec 0.5s ease infinite alternate;
+}
+@keyframes card-exec { from{transform:scale(1)} to{transform:scale(1.04)} }
+.timeline-card.done { border-color:var(--green); opacity:0.7; }
+.timeline-card.error-card { border-color:var(--red); }
+
+.tc-icon { font-size:1.3rem; margin-bottom:3px; }
+.tc-name { font-size:0.65rem; font-weight:700; }
+.tc-param { font-family:var(--font-mono); font-size:0.55rem; color:var(--accent); margin-top:2px; }
+.tc-remove {
+  position:absolute; top:-6px; right:-6px;
+  width:16px; height:16px;
+  background:var(--red);
+  border-radius:50%;
+  display:none;
+  align-items:center; justify-content:center;
+  font-size:0.6rem;
+  cursor:pointer;
+  color:white;
+  font-weight:900;
+}
+.timeline-card:hover .tc-remove { display:flex; }
+
+/* DROP ZONE */
+.drop-zone {
+  flex-shrink:0;
+  width:70px; height:60px;
+  border:2px dashed var(--border);
+  border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  color:var(--muted);
+  font-size:1.2rem;
+  transition:all 0.2s;
+}
+.drop-zone.drag-over {
+  border-color:var(--accent);
+  background:rgba(240,192,64,0.05);
+  box-shadow:0 0 12px var(--theme-glow);
+}
+
+/* ── RESULT OVERLAY ── */
+.result-overlay {
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.85);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+  backdrop-filter:blur(4px);
+}
+.result-overlay.active { display:flex; }
+.result-box {
+  background:var(--surface);
+  border:2px solid var(--border);
+  border-radius:20px;
+  padding:48px 56px;
+  text-align:center;
+  max-width:420px;
+  animation: pop-in 0.3s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+@keyframes pop-in { from{transform:scale(0.7);opacity:0} to{transform:scale(1);opacity:1} }
+.result-icon { font-size:4rem; margin-bottom:16px; }
+.result-title { font-size:2rem; font-weight:900; margin-bottom:8px; }
+.result-msg { font-family:var(--font-mono); font-size:0.75rem; color:var(--muted); margin-bottom:32px; line-height:1.6; }
+.result-stars { font-size:2rem; letter-spacing:6px; margin-bottom:24px; }
+.result-btns { display:flex; gap:12px; justify-content:center; }
+.btn-result {
+  background:var(--accent);
+  border:none; border-radius:10px;
+  color:#000; font-family:var(--font-head);
+  font-weight:800; font-size:0.85rem;
+  padding:12px 24px; cursor:pointer;
+  transition:all 0.2s;
+}
+.btn-result:hover { transform:scale(1.05); }
+.btn-result.secondary {
+  background:none; border:1px solid var(--border);
+  color:var(--muted);
+}
+.btn-result.secondary:hover { border-color:var(--text); color:var(--text); transform:none; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+</style>
+</head>
+<body class="theme-restaurant">
+
+<!-- ════════ SCREEN: MENU ════════ -->
+<div class="screen active" id="screen-menu">
+  <div class="menu-bg"></div>
+  <div class="menu-content">
+    <div class="game-logo"><span class="ro">ROBO</span><span class="bo">CO</span><span class="code">DE</span></div>
+    <div class="game-tagline">// Programme ton robot. Résous le problème.</div>
+    <div class="theme-select-title">Choisis une thématique</div>
+    <div class="theme-cards">
+      <div class="theme-card laundry" onclick="selectTheme('laundry')">
+        <div class="theme-icon">🧺</div>
+        <div class="theme-name">Lavomatique</div>
+        <div class="theme-desc">Automatise une laverie.<br>Trie, lave, plie.</div>
+      </div>
+      <div class="theme-card restaurant" onclick="selectTheme('restaurant')">
+        <div class="theme-icon">🍔</div>
+        <div class="theme-name">Restomatic</div>
+        <div class="theme-desc">Cuisine et livre<br>les commandes.</div>
+      </div>
+      <div class="theme-card hospital" onclick="selectTheme('hospital')">
+        <div class="theme-icon">🏥</div>
+        <div class="theme-name">MediMac</div>
+        <div class="theme-desc">Soigne les patients.<br>Gère l'urgence.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ SCREEN: LEVELS ════════ -->
+<div class="screen" id="screen-levels">
+  <div class="levels-header">
+    <div class="levels-title" id="levels-title">Restomatic</div>
+    <div class="levels-theme-badge" id="levels-badge">🍔 Restaurant</div>
+  </div>
+  <div class="levels-grid" id="levels-grid"></div>
+  <button class="btn-back" onclick="goTo('menu')">← Retour</button>
+</div>
+
+<!-- ════════ SCREEN: GAME ════════ -->
+<div class="screen" id="screen-game">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="btn-icon" onclick="goTo('levels')">←</button>
+      <div>
+        <div class="level-info-title" id="game-title">Niveau 1</div>
+        <div class="level-info-sub" id="game-sub">RESTOMATIC</div>
+      </div>
+    </div>
+    <div class="topbar-center">
+      <div class="mission-box">
+        <div class="mission-label">Mission</div>
+        <div class="mission-text" id="mission-text">Prends la commande et livre le burger.</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-reset" onclick="resetTimeline()">↺ Reset</button>
+      <button class="btn-run" id="btn-run" onclick="runProgram()">▶ Exécuter</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="game-area">
+    <!-- PALETTE -->
+    <div class="palette">
+      <div class="palette-title">// Blocs disponibles</div>
+      <div class="palette-list" id="palette-list"></div>
+    </div>
+
+    <!-- SIMULATION -->
+    <div class="sim-view">
+      <canvas class="sim-canvas" id="sim-canvas"></canvas>
+      <div class="sim-status" id="sim-status">EN ATTENTE</div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="timeline-area">
+      <div class="timeline-header">
+        <div class="timeline-label">⬡ Programme du robot</div>
+        <div class="timeline-hint">Glisse les blocs ici → Relie-les dans l'ordre</div>
+      </div>
+      <div class="timeline-track" id="timeline-track">
+        <div class="node-start">START</div>
+        <div class="connector" id="conn-start"></div>
+        <div class="drop-zone" id="drop-zone">+</div>
+        <div class="connector"></div>
+        <div class="node-end">END</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT OVERLAY -->
+<div class="result-overlay" id="result-overlay">
+  <div class="result-box">
+    <div class="result-icon" id="result-icon">✅</div>
+    <div class="result-title" id="result-title">Réussi !</div>
+    <div class="result-stars" id="result-stars">⭐⭐⭐</div>
+    <div class="result-msg" id="result-msg">Mission accomplie.</div>
+    <div class="result-btns">
+      <button class="btn-result secondary" onclick="goTo('levels')">Niveaux</button>
+      <button class="btn-result" id="btn-next" onclick="nextLevel()">Suivant →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA: THEMES & LEVELS
+// ══════════════════════════════════════════
+
+const THEMES = {
+  laundry: {
+    name:'Lavomatique', emoji:'🧺', class:'theme-laundry',
+    levels: [
+      { id:'l1', name:'Premier Lavage', diff:'easy',  mission:'Ramasse le linge sale et mets-le dans la machine.', solution:['pickup','move_right','load_machine'], hint:'3 actions suffisent', stars:3 },
+      { id:'l2', name:'Trier & Laver',  diff:'easy',  mission:'Trie le blanc et la couleur avant de lancer les machines.', solution:['pickup','sort_white','sort_color','move_right','load_machine'], hint:'5 étapes', stars:3 },
+      { id:'l3', name:'Séchage',        diff:'medium',mission:'Transfère le linge propre au sèche-linge et lance le cycle.', solution:['pickup','move_right','load_dryer','wait','pickup'], hint:'Pense à attendre le cycle', stars:2 },
+      { id:'l4', name:'Plier',          diff:'medium',mission:'Sors le linge sec et plie-le proprement.', solution:['pickup','fold','stack'], hint:'3 actions', stars:3 },
+      { id:'l5', name:'Clients',        diff:'hard',  mission:'Lave, sèche et rends le linge à 3 clients différents.', solution:['pickup','load_machine','wait','load_dryer','wait','deliver'], hint:'Gère le timing', stars:2 },
+      { id:'l6', name:'Panne!',         diff:'hard',  mission:'La machine tombe en panne. Répare et termine la commande.', solution:['repair','pickup','load_machine','wait','deliver'], hint:'Répare d\'abord!', stars:1 },
+    ],
+    cards: [
+      { id:'pickup',      icon:'📦', name:'Ramasser',    desc:'Prend un objet',   cat:'action' },
+      { id:'move_right',  icon:'→',  name:'Aller droite',desc:'Déplace à droite', cat:'move'   },
+      { id:'move_left',   icon:'←',  name:'Aller gauche',desc:'Déplace à gauche', cat:'move'   },
+      { id:'load_machine',icon:'🌀', name:'Charger M.',  desc:'Met dans machine', cat:'action' },
+      { id:'load_dryer',  icon:'💨', name:'Sèche-linge', desc:'Met au sèche-linge',cat:'action' },
+      { id:'sort_white',  icon:'⬜', name:'Trier blanc', desc:'Trie le blanc',    cat:'action' },
+      { id:'sort_color',  icon:'🌈', name:'Trier couleur',desc:'Trie couleurs',   cat:'action' },
+      { id:'fold',        icon:'👕', name:'Plier',       desc:'Plie le linge',    cat:'action' },
+      { id:'stack',       icon:'📚', name:'Empiler',     desc:'Empile le linge',  cat:'action' },
+      { id:'deliver',     icon:'🛍', name:'Livrer',      desc:'Rend au client',   cat:'action' },
+      { id:'repair',      icon:'🔧', name:'Réparer',     desc:'Répare machine',   cat:'action' },
+      { id:'wait',        icon:'⏳', name:'Attendre',    desc:'Attend un cycle',  cat:'wait'   },
+    ]
+  },
+  restaurant: {
+    name:'Restomatic', emoji:'🍔', class:'theme-restaurant',
+    levels: [
+      { id:'r1', name:'Première Commande', diff:'easy',  mission:'Prends la commande et livre le burger au client.', solution:['take_order','cook_burger','deliver'], hint:'3 étapes simples', stars:3 },
+      { id:'r2', name:'Burger + Frites',   diff:'easy',  mission:'Prépare un burger ET des frites avant de livrer.', solution:['take_order','cook_burger','cook_fries','assemble','deliver'], hint:'5 étapes', stars:3 },
+      { id:'r3', name:'File d\'attente',   diff:'medium',mission:'Sers 2 clients dans l\'ordre. Premier arrivé, premier servi.', solution:['take_order','cook_burger','deliver','take_order','cook_burger','deliver'], hint:'Répète la séquence', stars:2 },
+      { id:'r4', name:'Menu Complet',      diff:'medium',mission:'Prépare entrée, plat, dessert pour un client.', solution:['take_order','cook_starter','cook_burger','cook_dessert','assemble','deliver'], hint:'Respecte l\'ordre', stars:2 },
+      { id:'r5', name:'Heure de Pointe',   diff:'hard',  mission:'3 clients attendent. Optimise les cuissons en parallèle.', solution:['take_order','cook_burger','cook_fries','cook_burger','assemble','deliver','deliver','deliver'], hint:'Gère le timing', stars:1 },
+      { id:'r6', name:'Rupture de Stock',  diff:'hard',  mission:'Plus de steak! Propose une alternative et adapte la commande.', solution:['take_order','check_stock','cook_veggie','assemble','deliver'], hint:'Vérifie le stock d\'abord', stars:1 },
+    ],
+    cards: [
+      { id:'take_order',   icon:'📋', name:'Commande',    desc:'Prend la commande', cat:'action' },
+      { id:'move_right',   icon:'→',  name:'Aller droite',desc:'Déplace à droite',  cat:'move'   },
+      { id:'move_left',    icon:'←',  name:'Aller gauche',desc:'Déplace à gauche',  cat:'move'   },
+      { id:'cook_burger',  icon:'🍔', name:'Cuire Burger', desc:'Cuit un burger',    cat:'action' },
+      { id:'cook_fries',   icon:'🍟', name:'Cuire Frites', desc:'Cuit des frites',   cat:'action' },
+      { id:'cook_starter', icon:'🥗', name:'Cuire Entrée', desc:'Prépare l\'entrée', cat:'action' },
+      { id:'cook_dessert', icon:'🍰', name:'Dessert',      desc:'Prépare dessert',   cat:'action' },
+      { id:'cook_veggie',  icon:'🥦', name:'Cuire Végéta.',desc:'Option végétarienne',cat:'action'},
+      { id:'assemble',     icon:'🍱', name:'Assembler',    desc:'Monte le plateau',  cat:'action' },
+      { id:'deliver',      icon:'🛵', name:'Livrer',       desc:'Livre au client',   cat:'action' },
+      { id:'check_stock',  icon:'📦', name:'Vérif. Stock', desc:'Contrôle les stocks',cat:'logic' },
+      { id:'wait',         icon:'⏳', name:'Attendre',     desc:'Attend cuisson',    cat:'wait'   },
+    ]
+  },
+  hospital: {
+    name:'MediMac', emoji:'🏥', class:'theme-hospital',
+    levels: [
+      { id:'h1', name:'Premier Patient',   diff:'easy',  mission:'Accueille le patient et amène-le à la salle d\'examen.', solution:['greet','move_right','scan'], hint:'3 actions simples', stars:3 },
+      { id:'h2', name:'Diagnostic',        diff:'easy',  mission:'Scanne le patient, analyse et donne le diagnostic.', solution:['scan','analyze','diagnose'], hint:'Dans l\'ordre logique', stars:3 },
+      { id:'h3', name:'Médicaments',       diff:'medium',mission:'Récupère les médicaments et administre au patient.', solution:['move_left','pickup_meds','move_right','administer'], hint:'Pense à te déplacer', stars:2 },
+      { id:'h4', name:'Urgence!',          diff:'medium',mission:'Patient en urgence — stabilise avant de traiter.', solution:['greet','stabilize','scan','diagnose','administer'], hint:'Stabilise en premier!', stars:2 },
+      { id:'h5', name:'Deux Patients',     diff:'hard',  mission:'Gère deux patients simultanément sans erreur.', solution:['greet','scan','diagnose','move_left','greet','scan','administer','move_right','administer'], hint:'Organise tes déplacements', stars:1 },
+      { id:'h6', name:'Alerte Critique',   diff:'hard',  mission:'Panne du scanner! Utilise le diagnostic manuel.', solution:['greet','stabilize','manual_diag','pickup_meds','administer'], hint:'Adapte-toi à la panne', stars:1 },
+    ],
+    cards: [
+      { id:'greet',       icon:'👋', name:'Accueillir',  desc:'Accueille le patient', cat:'action' },
+      { id:'move_right',  icon:'→',  name:'Aller droite',desc:'Déplace à droite',     cat:'move'   },
+      { id:'move_left',   icon:'←',  name:'Aller gauche',desc:'Déplace à gauche',     cat:'move'   },
+      { id:'scan',        icon:'📡', name:'Scanner',     desc:'Scanne le patient',    cat:'action' },
+      { id:'analyze',     icon:'🔬', name:'Analyser',    desc:'Analyse les résultats',cat:'action' },
+      { id:'diagnose',    icon:'📋', name:'Diagnostiquer',desc:'Pose le diagnostic',  cat:'logic'  },
+      { id:'manual_diag', icon:'🩺', name:'Diag. Manuel',desc:'Diagnostic sans scanner',cat:'logic'},
+      { id:'stabilize',   icon:'💊', name:'Stabiliser',  desc:'Stabilise urgence',    cat:'action' },
+      { id:'pickup_meds', icon:'💉', name:'Récup. Méds', desc:'Prend médicaments',    cat:'action' },
+      { id:'administer',  icon:'🏥', name:'Administrer', desc:'Donne traitement',     cat:'action' },
+      { id:'wait',        icon:'⏳', name:'Attendre',    desc:'Attend résultats',     cat:'wait'   },
+    ]
+  }
+};
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let state = {
+  theme: 'restaurant',
+  levelIdx: 0,
+  timeline: [],
+  running: false,
+  cleared: { laundry:[], restaurant:[], hospital:[] }
+};
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function goTo(s) {
+  document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
+  document.getElementById('screen-'+s).classList.add('active');
+  if(s==='levels') renderLevels();
+  if(s==='menu') stopSimulation();
+}
+
+function selectTheme(t) {
+  state.theme = t;
+  document.body.className = THEMES[t].class;
+  goTo('levels');
+}
+
+function renderLevels() {
+  const th = THEMES[state.theme];
+  document.getElementById('levels-title').textContent = th.name;
+  document.getElementById('levels-badge').textContent = th.emoji+' '+th.name;
+  const grid = document.getElementById('levels-grid');
+  grid.innerHTML = th.levels.map((lv,i) => {
+    const cleared = state.cleared[state.theme].includes(i);
+    const locked = i > 0 && !state.cleared[state.theme].includes(i-1) && i > 1;
+    return `<div class="level-btn ${locked?'locked':''} ${cleared?'cleared':''}"
+      onclick="${locked?'':'loadLevel('+i+')'}"
+    >
+      <div class="level-num">NIVEAU ${i+1}</div>
+      <div class="level-name">${lv.name}</div>
+      <div class="level-diff ${lv.diff}">${lv.diff==='easy'?'⬤ Facile':lv.diff==='medium'?'⬤ Moyen':'⬤ Difficile'}</div>
+      <div class="level-stars">${cleared?'⭐'.repeat(lv.stars):locked?'🔒':''}</div>
+    </div>`;
+  }).join('');
+}
+
+function loadLevel(idx) {
+  state.levelIdx = idx;
+  state.timeline = [];
+  const th = THEMES[state.theme];
+  const lv = th.levels[idx];
+  document.getElementById('game-title').textContent = `Niveau ${idx+1} — ${lv.name}`;
+  document.getElementById('game-sub').textContent = th.name.toUpperCase();
+  document.getElementById('mission-text').textContent = lv.mission;
+  renderPalette();
+  renderTimeline();
+  goTo('game');
+  initCanvas();
+  setStatus('EN ATTENTE','');
+}
+
+// ══════════════════════════════════════════
+// PALETTE
+// ══════════════════════════════════════════
+function renderPalette() {
+  const cards = THEMES[state.theme].cards;
+  const lv = THEMES[state.theme].levels[state.levelIdx];
+  // Show only relevant cards (solution cards + 2 distractors)
+  const relevant = new Set(lv.solution);
+  const distractors = cards.filter(c=>!relevant.has(c.id)).slice(0,3);
+  const shown = [...cards.filter(c=>relevant.has(c.id)), ...distractors];
+
+  document.getElementById('palette-list').innerHTML = shown.map(c=>`
+    <div class="palette-card ${c.cat}" draggable="true"
+      data-id="${c.id}" data-icon="${c.icon}" data-name="${c.name}" data-cat="${c.cat}"
+      ondragstart="dragStart(event)">
+      <div class="card-icon">${c.icon}</div>
+      <div>
+        <div class="card-name">${c.name}</div>
+        <div class="card-desc">${c.desc}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ══════════════════════════════════════════
+// TIMELINE
+// ══════════════════════════════════════════
+function renderTimeline() {
+  const track = document.getElementById('timeline-track');
+  let html = `<div class="node-start">START</div>`;
+
+  state.timeline.forEach((card, i) => {
+    html += `<div class="connector ${card.done?'active':''}" id="conn-${i}"></div>`;
+    html += `<div class="timeline-card ${card.executing?'executing':''} ${card.done?'done':''} ${card.err?'error-card':''}"
+      id="tc-${i}" data-idx="${i}">
+      <div class="tc-remove" onclick="removeCard(${i})">×</div>
+      <div class="tc-icon">${card.icon}</div>
+      <div class="tc-name">${card.name}</div>
+    </div>`;
+  });
+
+  // Drop zone (only if not running)
+  if(!state.running) {
+    html += `<div class="connector"></div>
+    <div class="drop-zone" id="drop-zone"
+      ondragover="dragOver(event)" ondrop="dropCard(event)" ondragleave="dragLeave(event)">+</div>`;
+  }
+  html += `<div class="connector"></div><div class="node-end">END</div>`;
+  track.innerHTML = html;
+  track.scrollLeft = track.scrollWidth;
+}
+
+// ══════════════════════════════════════════
+// DRAG & DROP
+// ══════════════════════════════════════════
+let dragData = null;
+function dragStart(e) {
+  dragData = { id:e.target.dataset.id, icon:e.target.dataset.icon, name:e.target.dataset.name, cat:e.target.dataset.cat };
+  e.dataTransfer.effectAllowed='copy';
+}
+function dragOver(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone')?.classList.add('drag-over');
+}
+function dragLeave(e) {
+  document.getElementById('drop-zone')?.classList.remove('drag-over');
+}
+function dropCard(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone')?.classList.remove('drag-over');
+  if(!dragData) return;
+  state.timeline.push({ ...dragData, executing:false, done:false, err:false });
+  renderTimeline();
+}
+function removeCard(i) {
+  if(state.running) return;
+  state.timeline.splice(i,1);
+  renderTimeline();
+}
+
+// ══════════════════════════════════════════
+// CANVAS / SIMULATION
+// ══════════════════════════════════════════
+let canvas, ctx, animFrame;
+let robot = { x:80, y:0, tx:80, emoji:'🤖', action:null, actionTimer:0 };
+let worldItems = [];
+
+const THEME_WORLDS = {
+  restaurant: {
+    bg:'#1a1008', floor:'#2a1a0a',
+    items:[
+      { x:0.15, label:'CLIENT',  emoji:'🧑', color:'#f0c040' },
+      { x:0.45, label:'CUISINE', emoji:'🍳', color:'#e05a2b' },
+      { x:0.75, label:'CAISSE',  emoji:'🖥', color:'#5ab4f0' },
+    ]
+  },
+  laundry: {
+    bg:'#081018', floor:'#0a1820',
+    items:[
+      { x:0.15, label:'LINGE',   emoji:'👕', color:'#5ab4f0' },
+      { x:0.45, label:'MACHINE', emoji:'🌀', color:'#a07af0' },
+      { x:0.75, label:'SORTIE',  emoji:'📦', color:'#4de89a' },
+    ]
+  },
+  hospital: {
+    bg:'#081410', floor:'#0a1c14',
+    items:[
+      { x:0.15, label:'ACCUEIL', emoji:'👨‍⚕️', color:'#4de89a' },
+      { x:0.45, label:'SCANNER', emoji:'📡', color:'#5ab4f0' },
+      { x:0.75, label:'PHARMA',  emoji:'💊', color:'#f05a5a' },
+    ]
+  }
+};
+
+function initCanvas() {
+  canvas = document.getElementById('sim-canvas');
+  ctx = canvas.getContext('2d');
+  resizeCanvas();
+  const w = THEME_WORLDS[state.theme];
+  robot.x = 80; robot.y = 0; robot.tx = 80; robot.action = null;
+  worldItems = w.items.map(it=>({ ...it, px: Math.floor(it.x * canvas.width) }));
+  drawWorld();
+}
+
+function resizeCanvas() {
+  const r = canvas.parentElement.getBoundingClientRect();
+  canvas.width = r.width;
+  canvas.height = r.height;
+}
+
+function drawWorld() {
+  const W = canvas.width, H = canvas.height;
+  const w = THEME_WORLDS[state.theme];
+  // BG
+  ctx.fillStyle = w.bg;
+  ctx.fillRect(0,0,W,H);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+  ctx.lineWidth = 1;
+  for(let x=0;x<W;x+=40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for(let y=0;y<H;y+=40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // Floor
+  const floorY = H*0.72;
+  ctx.fillStyle = w.floor;
+  ctx.fillRect(0, floorY, W, H-floorY);
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(0,floorY); ctx.lineTo(W,floorY); ctx.stroke();
+
+  // World items
+  worldItems.forEach(it=>{
+    const ix = it.px, iy = floorY - 50;
+    // Platform
+    ctx.fillStyle = it.color+'22';
+    ctx.strokeStyle = it.color+'66';
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, ix-34, iy-10, 68, 60, 8);
+    ctx.fill(); ctx.stroke();
+    // Icon
+    ctx.font = '28px serif';
+    ctx.textAlign='center';
+    ctx.fillText(it.emoji, ix, iy+26);
+    // Label
+    ctx.font = `700 11px 'JetBrains Mono', monospace`;
+    ctx.fillStyle = it.color;
+    ctx.fillText(it.label, ix, iy+54);
+  });
+
+  // Robot
+  const ry = floorY - 28;
+  robot.y = ry;
+  // Shadow
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.beginPath();
+  ctx.ellipse(robot.x, ry+18, 22, 6, 0, 0, Math.PI*2);
+  ctx.fill();
+  // Body
+  ctx.font = '38px serif';
+  ctx.textAlign='center';
+  ctx.fillText('🤖', robot.x, ry+10);
+
+  // Action bubble
+  if(robot.action) {
+    ctx.fillStyle = 'rgba(0,0,0,0.8)';
+    roundRect(ctx, robot.x-40, ry-52, 80, 30, 8);
+    ctx.fill();
+    ctx.font = `700 11px 'Syne', sans-serif`;
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign='center';
+    ctx.fillText(robot.action, robot.x, ry-30);
+  }
+}
+
+function roundRect(ctx, x,y,w,h,r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
+}
+
+// ══════════════════════════════════════════
+// PROGRAM EXECUTION
+// ══════════════════════════════════════════
+let simInterval = null;
+
+function resetTimeline() {
+  stopSimulation();
+  state.timeline.forEach(c=>{ c.executing=false; c.done=false; c.err=false; });
+  renderTimeline();
+  initCanvas();
+  setStatus('EN ATTENTE','');
+  document.getElementById('btn-run').disabled = false;
+}
+
+function stopSimulation() {
+  if(simInterval) { clearInterval(simInterval); simInterval=null; }
+  if(animFrame) { cancelAnimationFrame(animFrame); animFrame=null; }
+  state.running = false;
+}
+
+async function runProgram() {
+  if(state.running || state.timeline.length===0) return;
+  state.running = true;
+  document.getElementById('btn-run').disabled = true;
+  setStatus('EXÉCUTION...','running');
+
+  const lv = THEMES[state.theme].levels[state.levelIdx];
+
+  // Reset card states
+  state.timeline.forEach(c=>{ c.executing=false; c.done=false; c.err=false; });
+  renderTimeline();
+
+  // Execute cards one by one
+  for(let i=0; i<state.timeline.length; i++) {
+    const card = state.timeline[i];
+    card.executing = true;
+    renderTimeline();
+    await animateAction(card, i);
+    card.executing = false;
+    card.done = true;
+    renderTimeline();
+  }
+
+  // Check solution
+  const userSeq = state.timeline.map(c=>c.id);
+  const correct = checkSolution(userSeq, lv.solution);
+
+  if(correct) {
+    setStatus('SUCCÈS !','success');
+    state.cleared[state.theme].push(state.levelIdx);
+    setTimeout(()=>showResult(true, lv), 600);
+  } else {
+    setStatus('ERREUR — Mauvaise séquence','error');
+    // Highlight wrong cards
+    markErrors(userSeq, lv.solution);
+    renderTimeline();
+    setTimeout(()=>showResult(false, lv), 600);
+  }
+  state.running = false;
+}
+
+function checkSolution(user, sol) {
+  if(user.length !== sol.length) return false;
+  return user.every((id,i)=>id===sol[i]);
+}
+
+function markErrors(user, sol) {
+  const maxLen = Math.min(user.length, sol.length);
+  for(let i=0;i<state.timeline.length;i++) {
+    if(i>=sol.length || user[i]!==sol[i]) state.timeline[i].err=true;
+  }
+}
+
+async function animateAction(card, idx) {
+  return new Promise(resolve=>{
+    // Determine target position
+    let targetX = robot.x;
+    const W = canvas.width;
+    if(card.id.includes('move_right') || card.id.includes('deliver') && idx>0)
+      targetX = Math.min(robot.x + 120, W-80);
+    else if(card.id.includes('move_left'))
+      targetX = Math.max(robot.x - 120, 80);
+
+    const startX = robot.x;
+    const dist = targetX - startX;
+    const duration = dist!==0 ? 600 : 500;
+    const actionName = card.name.toUpperCase();
+    const startTime = performance.now();
+
+    robot.action = actionName;
+
+    function step(now) {
+      const t = Math.min((now-startTime)/duration, 1);
+      const ease = t<0.5 ? 2*t*t : -1+(4-2*t)*t;
+      robot.x = startX + dist*ease;
+      // Bob animation
+      const bob = dist!==0 ? Math.sin(t*Math.PI*3)*6 : Math.sin(t*Math.PI*2)*4;
+      const savedY = robot.y;
+      robot.y = robot.y - bob;
+      drawWorld();
+      robot.y = savedY;
+      if(t<1) { animFrame=requestAnimationFrame(step); }
+      else {
+        robot.x = targetX;
+        // Flash effect
+        robot.action = '✓ '+actionName;
+        drawWorld();
+        setTimeout(()=>{ robot.action=null; drawWorld(); resolve(); }, 300);
+      }
+    }
+    animFrame=requestAnimationFrame(step);
+  });
+}
+
+function setStatus(msg, cls) {
+  const el = document.getElementById('sim-status');
+  el.textContent = msg;
+  el.className = 'sim-status' + (cls?' '+cls:'');
+}
+
+// ══════════════════════════════════════════
+// RESULT
+// ══════════════════════════════════════════
+function showResult(success, lv) {
+  document.getElementById('result-overlay').classList.add('active');
+  if(success) {
+    document.getElementById('result-icon').textContent = '🎉';
+    document.getElementById('result-title').textContent = 'Mission réussie !';
+    document.getElementById('result-stars').textContent = '⭐'.repeat(lv.stars);
+    document.getElementById('result-msg').textContent = `Robot programmé avec succès !\n${lv.hint ? 'Astuce appliquée : '+lv.hint : ''}`;
+    document.getElementById('btn-next').style.display='';
+    document.getElementById('result-title').style.color='var(--green)';
+  } else {
+    document.getElementById('result-icon').textContent = '❌';
+    document.getElementById('result-title').textContent = 'Séquence incorrecte';
+    document.getElementById('result-stars').textContent = '';
+    document.getElementById('result-msg').textContent = `La séquence d'actions n'est pas correcte.\nIndice : ${lv.hint}\nRéorganise tes blocs et réessaie !`;
+    document.getElementById('btn-next').style.display='none';
+    document.getElementById('result-title').style.color='var(--red)';
+  }
+}
+
+function nextLevel() {
+  document.getElementById('result-overlay').classList.remove('active');
+  const th = THEMES[state.theme];
+  if(state.levelIdx+1 < th.levels.length) loadLevel(state.levelIdx+1);
+  else goTo('levels');
+}
+
+document.getElementById('result-overlay').addEventListener('click', function(e){
+  if(e.target===this){
+    this.classList.remove('active');
+    if(!state.running) document.getElementById('btn-run').disabled=false;
+    resetTimeline();
+  }
+});
+
+// ══════════════════════════════════════════
+// RESIZE
+// ══════════════════════════════════════════
+window.addEventListener('resize', ()=>{
+  if(document.getElementById('screen-game').classList.contains('active')) {
+    resizeCanvas();
+    worldItems.forEach(it=>{ it.px = Math.floor(it.x * canvas.width); });
+    drawWorld();
+  }
+});
+</script>
+</body>
+</html>
