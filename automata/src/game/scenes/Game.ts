@@ -20,6 +20,10 @@ export class Game extends Scene
         this.load.image('robot-profil0003', 'robot-profil0003.png');
         this.load.image('robot-profil0006', 'robot-profil0006.png');
         this.load.image('robot-profil0009', 'robot-profil0009.png');
+        this.load.image('robot-back0000', 'robot-back0000.png');
+        this.load.image('robot-back0003', 'robot-back0003.png');
+        this.load.image('robot-back0006', 'robot-back0006.png');
+        this.load.image('robot-back0009', 'robot-back0009.png');
         this.load.image('image0000', 'image0000.png');
         this.load.image('image0003', 'image0003.png');
         this.load.image('image0006', 'image0006.png');
@@ -38,9 +42,10 @@ export class Game extends Scene
         this.add.image(512, 384, 'background');
         
         // Créer le sprite du robot face
-        const robotFace = this.add.sprite(100, 150, 'robot-face0000');
+        const robotFace = this.add.sprite(512, 400, 'robot-face0000');
         robotFace.setOrigin(0, 0);
         robotFace.setDisplaySize(1920, 1080);
+        robotFace.setVisible(true);
         
         // Créer l'animation du robot face
         this.anims.create({
@@ -55,28 +60,66 @@ export class Game extends Scene
             repeat: -1
         });
         
-        // Créer le sprite du robot profile
-        const robotProfile = this.add.sprite(-500, 300, 'robot-profil0000');
-        robotProfile.setOrigin(0, 0);
-        robotProfile.setDisplaySize(1000, 1000);
+        // Créer le sprite du robot back
+        const robotBack = this.add.sprite(512, 400, 'robot-back0000');
+        robotBack.setOrigin(0, 0);
+        robotBack.setDisplaySize(1920, 1080);
+        robotBack.setVisible(false);
         
-        // Créer l'animation du robot profile
+        // Créer l'animation du robot back
         this.anims.create({
-            key: 'robot-profile-idle',
+            key: 'robot-back-idle',
             frames: [
-                { key: 'robot-profil0000' },
-                { key: 'robot-profil0003' },
-                { key: 'robot-profil0006' },
-                { key: 'robot-profil0009' }
+                { key: 'robot-back0000' },
+                { key: 'robot-back0003' },
+                { key: 'robot-back0006' },
+                { key: 'robot-back0009' }
             ],
             frameRate: 6,
             repeat: -1
         });
         
+        // Créer le mouvement vertical du robot
+        const moveUpTween = this.tweens.add({
+            targets: [robotFace, robotBack],
+            y: 300,
+            duration: 3000,
+            paused: true,
+            onStart: () => {
+                robotFace.setVisible(false);
+                robotFace.stop();
+                robotBack.setVisible(true);
+                robotBack.play('robot-back-idle');
+            },
+            onComplete: () => {
+                setTimeout(() => moveDownTween.play(), 1000);
+            }
+        });
+        
+        const moveDownTween = this.tweens.add({
+            targets: [robotFace, robotBack],
+            y: 400,
+            duration: 3000,
+            paused: true,
+            onStart: () => {
+                robotBack.setVisible(false);
+                robotBack.stop();
+                robotFace.setVisible(true);
+                robotFace.play('robot-face-idle');
+            },
+            onComplete: () => {
+                setTimeout(() => moveUpTween.play(), 1000);
+            }
+        });
+        
+        // Démarrer le mouvement
+        robotFace.play('robot-face-idle');
+        moveUpTween.play();
+        
         // Créer le sprite de la machine à laver
         const washerMachine = this.add.sprite(0, 0, 'washer-machine-run1');
         washerMachine.setOrigin(0, 0);
-        washerMachine.setDisplaySize(500, 250);
+        washerMachine.setDisplaySize(1920, 1080);
         
         // Créer l'animation de la machine à laver
         this.anims.create({
@@ -94,22 +137,38 @@ export class Game extends Scene
     
         
         // Lancer les animations
-        robotFace.play('robot-face-idle');
-        robotProfile.play('robot-profile-idle');
         washerMachine.play('washer-machine-run');
+        
+        // Créer le sprite du robot qui roule
+        const robotRoller = this.add.sprite(50, 700, 'image0000');
+        
+        // Créer l'animation du robot qui roule
+        this.anims.create({
+            key: 'robot-roller-move',
+            frames: [
+                { key: 'image0000' },
+                { key: 'image0003' },
+                { key: 'image0006' },
+                { key: 'image0009' }
+            ],
+            frameRate: 6,
+            repeat: -1
+        });
+        
+        robotRoller.play('robot-roller-move');
         
         // Créer le mouvement du robot qui roule de gauche à droite
         this.tweens.add({
-            targets: robotProfile,
-            x: 500,
+            targets: robotRoller,
+            x: 974,
             duration: 5000,
             yoyo: true,
             repeat: -1,
             onYoyo: () => {
-                robotProfile.setFlipX(true);
+                robotRoller.setFlipX(true);
             },
             onRepeat: () => {
-                robotProfile.setFlipX(false);
+                robotRoller.setFlipX(false);
             }
         });
     }
