@@ -12,10 +12,10 @@ export class Game extends Scene
         this.load.setPath('assets');
         
         this.load.image('background', 'bg.png');
-        this.load.image('robot-face0000', 'robot-face0000.png');
-        this.load.image('robot-face0003', 'robot-face0003.png');
-        this.load.image('robot-face0006', 'robot-face0006.png');
-        this.load.image('robot-face0009', 'robot-face0009.png');
+        this.load.image('robot-front0000', 'robot-front0000.png');
+        this.load.image('robot-front0003', 'robot-front0003.png');
+        this.load.image('robot-front0006', 'robot-front0006.png');
+        this.load.image('robot-front0009', 'robot-front0009.png');
         this.load.image('robot-profil0000', 'robot-profil0000.png');
         this.load.image('robot-profil0003', 'robot-profil0003.png');
         this.load.image('robot-profil0006', 'robot-profil0006.png');
@@ -24,10 +24,6 @@ export class Game extends Scene
         this.load.image('robot-back0003', 'robot-back0003.png');
         this.load.image('robot-back0006', 'robot-back0006.png');
         this.load.image('robot-back0009', 'robot-back0009.png');
-        this.load.image('image0000', 'image0000.png');
-        this.load.image('image0003', 'image0003.png');
-        this.load.image('image0006', 'image0006.png');
-        this.load.image('image0009', 'image0009.png');
         this.load.image('washer-machine-run1', 'washer-machine-run1.png');
         this.load.image('washer-machine-run2', 'washer-machine-run2.png');
         this.load.image('washer-machine-run3', 'washer-machine-run3.png');
@@ -42,7 +38,7 @@ export class Game extends Scene
         this.add.image(512, 384, 'background');
         
         // Créer le sprite du robot face
-        const robotFace = this.add.sprite(512, 400, 'robot-face0000');
+        const robotFace = this.add.sprite(512, 400, 'robot-front0000');
         robotFace.setOrigin(0, 0);
         robotFace.setDisplaySize(1920, 1080);
         robotFace.setVisible(true);
@@ -51,17 +47,17 @@ export class Game extends Scene
         this.anims.create({
             key: 'robot-face-idle',
             frames: [
-                { key: 'robot-face0000' },
-                { key: 'robot-face0003' },
-                { key: 'robot-face0006' },
-                { key: 'robot-face0009' }
+                { key: 'robot-front0000' },
+                { key: 'robot-front0003' },
+                { key: 'robot-front0006' },
+                { key: 'robot-front0009' }
             ],
             frameRate: 6,
             repeat: -1
         });
         
         // Créer le sprite du robot back
-        const robotBack = this.add.sprite(512, 400, 'robot-back0000');
+        const robotBack = this.add.sprite(0, 0, 'robot-back0000');
         robotBack.setOrigin(0, 0);
         robotBack.setDisplaySize(1920, 1080);
         robotBack.setVisible(false);
@@ -82,7 +78,7 @@ export class Game extends Scene
         // Créer le mouvement vertical du robot
         const moveUpTween = this.tweens.add({
             targets: [robotFace, robotBack],
-            y: 300,
+            y: 0,
             duration: 3000,
             paused: true,
             onStart: () => {
@@ -140,16 +136,16 @@ export class Game extends Scene
         washerMachine.play('washer-machine-run');
         
         // Créer le sprite du robot qui roule
-        const robotRoller = this.add.sprite(50, 700, 'image0000');
+        const robotRoller = this.add.sprite(50, 700, 'robot-profil0000');
         
         // Créer l'animation du robot qui roule
         this.anims.create({
             key: 'robot-roller-move',
             frames: [
-                { key: 'image0000' },
-                { key: 'image0003' },
-                { key: 'image0006' },
-                { key: 'image0009' }
+                { key: 'robot-profil0000' },
+                { key: 'robot-profil0003' },
+                { key: 'robot-profil0006' },
+                { key: 'robot-profil0009' }
             ],
             frameRate: 6,
             repeat: -1
