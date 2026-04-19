@@ -13,7 +13,7 @@ export class Timer
 
     update() {
         const now = Date.now();
-        this.currentRemainingTime = this.currentRemainingTime - (this.lastTime - now)
+        this.currentRemainingTime = this.currentRemainingTime - (now - this.lastTime);
         this.lastTime = now;
         return this;
     }

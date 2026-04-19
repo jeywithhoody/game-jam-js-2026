@@ -1,10 +1,12 @@
 import { Scene, Button, SceneManager, Text } from 'phaser';
 import { Timer } from '../util/Timer';
+import { LevelGrid } from '../grid/LevelGrid';
 
 export class Level extends Scene
 {
     protected timer : Timer = null;
     private timerText : Text = null;
+    protected levelGrid: LevelGrid = null;
 
     constructor(levelName: string)
     {
@@ -55,18 +57,24 @@ export class Level extends Scene
         .setOrigin(0)
         .setDisplaySize(this.scale.width, this.scale.height);
         this.timerText = this.add.text(0, 0, 'Timer : ' + this.timer.getTime());
-        this.timer = this.timer.reset();
+        this.timer.reset();
     }
 
     update(time: number, delta: number)
     {
-        this.timer = this.timer.update();
+        this.timer.update();
         this.draw();
     }
 
     draw()
     {
-        console.log('draw!');
-        this.timerText = this.timerText.setText('Timer : ' + this.timer.getTime());
+        this.timerText.setText('Timer : ' + Math.ceil(this.timer.getTime() / 1000));
+    }
+
+    /**
+     * Get the level grid
+     */
+    public getGrid(): LevelGrid {
+        return this.levelGrid;
     }
 }

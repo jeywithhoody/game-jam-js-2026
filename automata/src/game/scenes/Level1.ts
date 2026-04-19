@@ -1,6 +1,8 @@
 import { Level } from './Level';
 import { Scene, Button, SceneManager } from 'phaser';
 import SceneNames from './SceneName';
+import { Level1Grid } from '../grid/Level1Grid';
+import { LevelZoneScene } from './LevelZoneScene';
 
 
 /**
@@ -11,6 +13,8 @@ import SceneNames from './SceneName';
 
 export class Level1 extends Level
 {
+    private levelZoneScene: LevelZoneScene;
+
     constructor()
     {
         super(SceneNames.Level1)
@@ -38,16 +42,19 @@ export class Level1 extends Level
     create()
     {
         super.create();
+        this.levelGrid = new Level1Grid();
+        
+        // Initialize level zone scene with grid visuals
+        this.levelZoneScene = new LevelZoneScene(this);
+        this.levelZoneScene.initializeGridVisuals(this.levelGrid);
     }
 
     update(time: number, delta: number)
     {
         super.update(time, delta);
-        this.draw();
     }
 
     draw()
     {
-
     }
 }
