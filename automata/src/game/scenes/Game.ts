@@ -1,11 +1,13 @@
 import { Scene } from 'phaser';
 import { Cards, MovementCardsScene, CardType, CardSpeed } from './MovementCardsScene.ts';
 import { DeckScene } from './DeckScene.ts';
+import { LevelZoneScene } from './LevelZoneScene.ts';
 
 export class Game extends Scene
 {
     private cardScene: MovementCardsScene;
     private deckScene: DeckScene;
+    private levelZoneScene: LevelZoneScene;
     constructor ()
     {
         super('Game');
@@ -134,27 +136,27 @@ export class Game extends Scene
         moveUpTween.play();
         
         // Créer le sprite de la machine à laver
-        const washerMachine = this.add.sprite(0, 0, 'washer-machine-run1');
-        washerMachine.setOrigin(0, 0);
-        washerMachine.setDisplaySize(1920, 1080);
+        // const washerMachine = this.add.sprite(0, 0, 'washer-machine-run1');
+        // washerMachine.setOrigin(0, 0);
+        // washerMachine.setDisplaySize(1920, 1080);
         
-        // Créer l'animation de la machine à laver
-        this.anims.create({
-            key: 'washer-machine-run',
-            frames: [
-                { key: 'washer-machine-run1' },
-                { key: 'washer-machine-run2' },
-                { key: 'washer-machine-run3' },
-                { key: 'washer-machine-run5' },
-                { key: 'washer-machine-run6' }
-            ],
-            frameRate: 6,
-            repeat: -1
-        });
+        // // Créer l'animation de la machine à laver
+        // this.anims.create({
+        //     key: 'washer-machine-run',
+        //     frames: [
+        //         { key: 'washer-machine-run1' },
+        //         { key: 'washer-machine-run2' },
+        //         { key: 'washer-machine-run3' },
+        //         { key: 'washer-machine-run5' },
+        //         { key: 'washer-machine-run6' }
+        //     ],
+        //     frameRate: 6,
+        //     repeat: -1
+        // });
     
         
-        // Lancer les animations
-        washerMachine.play('washer-machine-run');
+        // // Lancer les animations
+        // washerMachine.play('washer-machine-run');
         
         // Créer le sprite du robot qui roule
         const robotRoller = this.add.sprite(50, 700, 'robot-profil0000');
@@ -200,5 +202,8 @@ export class Game extends Scene
 
         // Initialize deck scene after assets are loaded
         this.deckScene = new DeckScene(this);
+
+        // Initialize level zone scene
+        this.levelZoneScene = new LevelZoneScene(this);
     }
 }
