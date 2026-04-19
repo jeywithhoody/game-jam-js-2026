@@ -1,4 +1,5 @@
-import { Scene } from 'phaser';
+import { Scene, Button, SceneManager } from 'phaser';
+import SceneNames from './SceneName';
 
 export class Game extends Scene
 {
@@ -166,6 +167,42 @@ export class Game extends Scene
             onRepeat: () => {
                 robotRoller.setFlipX(false);
             }
+        });
+
+
+        // Create level 1 button
+        this.createLevel1Button(this.scene);
+    }
+
+    update(time: number, delta: number)
+    {
+
+    }
+
+    private createLevel1Button(scene: Scene)
+    {
+        // Create level 1 button
+        const level1Button = this.add.text(400, 300, 'Level 1', {
+            fontFamily: 'Arial',
+            fontSize: '32px',
+            color: '#ffffff',
+            align: 'center',
+            fixedWidth: 260,
+            backgroundColor: '#2d2d2d'
+        }).setPadding(32).setOrigin(0.5);
+
+        level1Button.setInteractive({ useHandCursor: true });
+
+        level1Button.on('pointerover', () => {
+            level1Button.setBackgroundColor('#8d8d8d');
+        });
+
+        level1Button.on('pointerout', () => {
+            level1Button.setBackgroudColor('#2d2d2d');
+        });
+
+        level1Button.on('pointerup', () => {
+            scene.start(SceneNames.Level1);
         });
     }
 }
