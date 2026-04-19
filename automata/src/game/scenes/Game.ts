@@ -1,8 +1,12 @@
 import { Scene, Button, SceneManager } from 'phaser';
+import { Cards, MovementCardsScene, CardType, CardSpeed } from './MovementCardsScene.ts';
+import { DeckScene } from './DeckScene.ts';
 import SceneNames from './SceneName';
 
 export class Game extends Scene
 {
+    private cardScene: MovementCardsScene;
+    private deckScene: DeckScene;
     constructor ()
     {
         super('Game');
@@ -12,7 +16,7 @@ export class Game extends Scene
     {
         this.load.setPath('assets');
         
-        this.load.image('background', 'bg.png');
+        this.load.image('background', 'background.png');
         this.load.image('robot-front0000', 'robot-front0000.png');
         this.load.image('robot-front0003', 'robot-front0003.png');
         this.load.image('robot-front0006', 'robot-front0006.png');
@@ -31,12 +35,29 @@ export class Game extends Scene
 
         this.load.image('washer-machine-run5', 'washer-machine-run5.png');
         this.load.image('washer-machine-run6', 'washer-machine-run6.png');
+
+        // Load card images
+        for (const type of Object.values(CardType)) {
+            for (const speed of [1, 2]) {
+                const cardKey = `card-${type}-${speed}.png`;
+                this.load.image(cardKey, cardKey);
+            }
+        }
+
+        // Load card back image for deck
+        this.load.image('card-back', 'card-back.png');
+
+        // Initialize movement cards scene
+        this.cardScene = new MovementCardsScene(this);
     }
 
     create ()
     {
         // Afficher le fond
-        this.add.image(512, 384, 'background');
+        const background = this.add.image(0, 0, 'background');
+        background.setOrigin(0, 0);
+        //background.setDisplaySize(1920, 1080);
+        
         
         // Créer le sprite du robot face
         const robotFace = this.add.sprite(512, 400, 'robot-front0000');
@@ -169,6 +190,17 @@ export class Game extends Scene
             }
         });
 
+        // Display sample hand of movement cards
+        this.cardScene.setHand([
+            { type: CardType.MoveRight, speed: 1 },
+            { type: CardType.MoveUp, speed: 2 },
+            { type: CardType.MoveDown, speed: 1 },
+            { type: CardType.MoveLeft, speed: 2 },
+            { type: CardType.MoveRight, speed: 2 }
+        ]);
+
+        // Initialize deck scene after assets are loaded
+        this.deckScene = new DeckScene(this);
 
         // Create level 1 button
         this.createLevel1Button(this.scene);
