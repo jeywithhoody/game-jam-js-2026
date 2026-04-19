@@ -42,6 +42,8 @@ export class MovementCardsScene {
     private cardSprites: GameObjects.Sprite[] = [];
     private cardSpacing: number = 200; // Space between cards
     private scene: Scene;
+    private containerWidth: number = 1255; // Width of the movement cards area
+    private lineHeight: number = 150; // Height of each line
 
 
 
@@ -103,21 +105,68 @@ export class MovementCardsScene {
 
         if (this.handCards.length === 0) return;
 
-        // Calculate total width needed
-        const totalWidth = (this.handCards.length - 1) * this.cardSpacing;
-        const startX = -this.cardSpacing -30;
+        const cardWidth = 240; // Cropped card width
+        const cardHeight = 400; // Cropped card height
+        const baseCardSpacing = -20; // Negative for overlapping cards
+        const lineSpacing = 0; // Spacing between lines
+        const padding = 10; // Padding from edges
 
-        // Add cards to container
-        this.handCards.forEach((card, index) => {
-            const imageKey = `card-${card.type}-${card.speed}.png`;
-            const sprite = this.scene.add.sprite(startX + index * this.cardSpacing, 0, imageKey);
-            sprite.setOrigin(0, 0);
-            // Crop to show only the card (from the 1920x1080 image)
-            sprite.setCrop(170, 10, 240, 400);
-            sprite.setScale(1.1);
-            sprite.setDepth(index + 1);
-            this.movementCardsContainer.add(sprite);
-            this.cardSprites.push(sprite);
-        });
+        // Display 6 cards per line
+        const cardsPerLine = 6;
+
+        // Calculate number of lines
+        const numLines = Math.ceil(this.handCards.length / cardsPerLine);
+
+        // Calculate scale to fit everything in the container (1255 x 360)
+        const neededWidth = cardsPerLine * cardWidth + (cardsPerLine - 1) * baseCardSpacing;
+        const neededHeight = numLines * cardHeight + (numLines - 1) * lineSpacing;
+
+        let scale = 1;
+        if (neededWidth > this.containerWidth - (padding * 2)) {
+            scale = Math.min(scale, (this.containerWidth - (padding * 2)) / neededWidth);
+        }
+        if (neededHeight > 360 - (padding * 2)) {
+            scale = Math.min(scale, (360 - (padding * 2)) / neededHeight);
+        }
+
+        const scaledCardWidth = cardWidth * scale;
+        const scaledCardHeight = cardHeight * scale;
+        const scaledSpacing = baseCardSpacing * scale;
+        const scaledLineSpacing = lineSpacing * scale;
+
+        // Position cards - top to bottom, left to right
+        // Ensure all cards stay within bounds (0, 0) to (1255, 360)
+        let cardIndex = 0;
+        for (let lineIndex = 0; lineIndex < numLines; lineIndex++) {
+            const cardsInThisLine = Math.min(cardsPerLine, this.handCards.length - cardIndex);
+
+            // Calculate total width of this line
+            const totalLineWidth = cardsInThisLine * scaledCardWidth + Math.max(0, (cardsInThisLine - 1) * scaledSpacing);
+            
+            // Center line horizontally within bounds
+            const startX = padding + (this.containerWidth - 2 * padding - totalLineWidth) / 2;
+            const startY = padding + lineIndex * (scaledCardHeight + scaledLineSpacing);
+
+            // Ensure we stay within bounds
+            const clampedStartY = Math.min(startY, 360 - scaledCardHeight);
+
+            for (let i = 0; i < cardsInThisLine; i++) {
+                const card = this.handCards[cardIndex];
+                const imageKey = `card-${card.type}-${card.speed}.png`;
+                const xPos = startX + i * (scaledCardWidth + scaledSpacing);
+                
+                // Clamp X position to ensure card stays within bounds
+                const clampedXPos = Math.max(0, Math.min(xPos, this.containerWidth - scaledCardWidth));
+                
+                const sprite = this.scene.add.sprite(clampedXPos, clampedStartY, imageKey);
+                sprite.setOrigin(0, 0);
+                sprite.setCrop(170, 10, 240, 400);
+                sprite.setScale(scale);
+                sprite.setDepth(cardIndex + 1);
+                this.movementCardsContainer.add(sprite);
+                this.cardSprites.push(sprite);
+                cardIndex++;
+            }
+        }
     }
 }
