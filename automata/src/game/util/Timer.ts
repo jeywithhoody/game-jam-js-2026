@@ -8,6 +8,7 @@ export class Timer
 
     reset() {
         this.currentRemainingTime = this.startingSeconds;
+        this.lastTime = Date.now();
         return this;
     }
 

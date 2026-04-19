@@ -1,5 +1,6 @@
 import { Game as MainGame } from './scenes/Game';
 import { Level1 } from './scenes/Level1';
+import { LevelSelectScene } from './scenes/LevelSelectScene';
 import { AUTO, Game, Scale,Types } from 'phaser';
 
 // Find out more information about the Game Config at:
@@ -16,6 +17,7 @@ const config: Types.Core.GameConfig = {
     },
     scene: [
         MainGame,
+        LevelSelectScene,
         Level1
     ]
 };

@@ -63,9 +63,6 @@ export class Level extends Scene
         .setDisplaySize(this.scale.width, this.scale.height);
         this.timerText = this.add.text(0, 0, 'Timer : ' + this.timer.getTime());
         this.timer.reset();
-        
-        // Create robot sprite in the level zone
-        this.createRobotSprite();
     }
 
     protected createRobotSprite(): void {

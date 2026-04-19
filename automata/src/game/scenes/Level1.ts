@@ -46,6 +46,9 @@ export class Level1 extends Level
         super.create();
         this.levelGrid = new Level1Grid();
         
+        // Create robot sprite after grid is initialized
+        this.createRobotSprite();
+        
         // Initialize level zone scene with grid visuals
         this.levelZoneScene = new LevelZoneScene(this);
         this.levelZoneScene.initializeGridVisuals(this.levelGrid);
