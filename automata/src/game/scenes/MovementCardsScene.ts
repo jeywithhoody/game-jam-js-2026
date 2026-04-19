@@ -1,4 +1,4 @@
-import { Scene, GameObjects } from 'phaser';
+import { Scene, GameObjects, Geom } from 'phaser';
 
 export enum CardType {
     MoveLeft = 'move-left',
@@ -16,34 +16,52 @@ function getCardName(type: CardType, speed: CardSpeed) {
     return `card-${type}-${speed}.png`
 }
 
-export const Cards: Record<CardType, Record<CardSpeed, string>> = {
+interface CardInfo {
+    path: string;
+    cropZone: CropZone;
+}
+
+interface CropZone {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+}
+
+export const Cards: Record<CardType, Record<CardSpeed, CardInfo>> = {
     'move-down': {
-        '1': getCardName(CardType.MoveDown, 1),
-        '2': getCardName(CardType.MoveDown, 2)
+        '1': { path: getCardName(CardType.MoveDown, 1), cropZone: { x: 940, y: 40, w: 167, h: 228 } },
+        '2': { path: getCardName(CardType.MoveDown, 2), cropZone: { x: 760, y: 40, w: 167, h: 228 }  },
     },
     'move-up': {
-        '1': getCardName(CardType.MoveUp, 1),
-        '2': getCardName(CardType.MoveUp, 2)
+        '1': { path: getCardName(CardType.MoveUp, 1), cropZone: { x: 1300, y: 40, w: 167, h: 228 }},
+        '2': { path: getCardName(CardType.MoveUp, 2), cropZone: { x: 1120, y: 40, w: 167, h: 228 } },
     },
     'move-left': {
-        '1': getCardName(CardType.MoveLeft, 1),
-        '2': getCardName(CardType.MoveLeft, 2)
+        '1': { path: getCardName(CardType.MoveLeft, 1), cropZone: { x: 40, y: 40, w: 171, h: 232 } },
+        '2': { path: getCardName(CardType.MoveLeft, 2), cropZone: { x: 220, y: 40, w: 171, h: 232 } },
     },
     'move-right': {
-        '1': getCardName(CardType.MoveRight, 1),
-        '2': getCardName(CardType.MoveRight, 2)
+        '1': { path: getCardName(CardType.MoveRight, 1), cropZone: { x: 400, y: 40, w: 169, h: 230 } },
+        '2': { path: getCardName(CardType.MoveRight, 2), cropZone: { x: 580, y: 40, w: 169, h: 230 }  }
     }
 }
+
+const CardWidth = 171;
+const CardHeight = 232;
+const CardPositionX = 40;
+const CardPositionY = 40;
 
 export class MovementCardsScene {
 
     public movementCardsContainer: GameObjects.Container;
     private handCards: Array<{ type: CardType; speed: CardSpeed }> = [];
     private cardSprites: GameObjects.Sprite[] = [];
-    private cardSpacing: number = 200; // Space between cards
     private scene: Scene;
     private containerWidth: number = 1255; // Width of the movement cards area
-    private lineHeight: number = 150; // Height of each line
+    private selectedCardIndex: number | null = null;
+    private tempCardOrder: Array<{ type: CardType; speed: CardSpeed }> | null = null;
+    private cardPositions: Array<{ x: number; y: number; index: number }> = [];
 
 
 
@@ -58,6 +76,46 @@ export class MovementCardsScene {
         const bg = this.scene.add.rectangle(0, 0, 1255, 360, 0x222222, 0.5);
         bg.setOrigin(0, 0);
         this.movementCardsContainer.add(bg);
+
+        // Set up keyboard listeners for card movement
+        this.scene.input.keyboard?.on('keydown-LEFT', () => {
+            if (this.selectedCardIndex !== null && this.tempCardOrder !== null && this.selectedCardIndex > 0) {
+                // Move card left (swap with previous)
+                const temp = this.tempCardOrder[this.selectedCardIndex];
+                this.tempCardOrder[this.selectedCardIndex] = this.tempCardOrder[this.selectedCardIndex - 1];
+                this.tempCardOrder[this.selectedCardIndex - 1] = temp;
+                this.selectedCardIndex--;
+                this.renderHandWithSelection();
+            }
+        });
+
+        this.scene.input.keyboard?.on('keydown-RIGHT', () => {
+            if (this.selectedCardIndex !== null && this.tempCardOrder !== null && this.selectedCardIndex < this.tempCardOrder.length - 1) {
+                // Move card right (swap with next)
+                const temp = this.tempCardOrder[this.selectedCardIndex];
+                this.tempCardOrder[this.selectedCardIndex] = this.tempCardOrder[this.selectedCardIndex + 1];
+                this.tempCardOrder[this.selectedCardIndex + 1] = temp;
+                this.selectedCardIndex++;
+                this.renderHandWithSelection();
+            }
+        });
+
+        this.scene.input.keyboard?.on('keydown-ENTER', () => {
+            if (this.selectedCardIndex !== null && this.tempCardOrder !== null) {
+                // Validate the movement
+                this.handCards = [...this.tempCardOrder];
+                this.selectedCardIndex = null;
+                this.tempCardOrder = null;
+                this.renderHand();
+            }
+        });
+
+        this.scene.input.keyboard?.on('keydown-ESC', () => {
+            // Cancel the movement
+            this.selectedCardIndex = null;
+            this.tempCardOrder = null;
+            this.renderHand();
+        });
     }
 
     addMovementCard(imageKey: string) {
@@ -99,32 +157,55 @@ export class MovementCardsScene {
     }
 
     private renderHand() {
+        this.renderHandInternal(this.handCards, null);
+    }
+
+    private renderHandWithSelection() {
+        if (this.tempCardOrder) {
+            this.renderHandInternal(this.tempCardOrder, this.selectedCardIndex);
+        }
+    }
+
+    private renderHandInternal(cards: Array<{ type: CardType; speed: CardSpeed }>, selectedIndex: number | null) {
         // Remove old card sprites
         this.cardSprites.forEach(sprite => sprite.destroy());
         this.cardSprites = [];
+        this.cardPositions = [];
 
-        if (this.handCards.length === 0) return;
+        if (cards.length === 0) return;
 
         const cardWidth = 240; // Cropped card width
         const cardHeight = 400; // Cropped card height
-        const baseCardSpacing = -20; // Negative for overlapping cards
-        const lineSpacing = 0; // Spacing between lines
-        const padding = 10; // Padding from edges
+        const baseCardSpacing = -30; // Negative for overlapping cards
+        const lineSpacing = -50; // Negative for overlapping rows
+        const padding = 5; // Minimal padding from edges
+        const minScale = 0.3; // Minimum scale to avoid cards being too small
 
-        // Display 6 cards per line
-        const cardsPerLine = 6;
+        // Start with max 10 cards per line, calculate scale needed
+        let cardsPerLine = 10;
+        let scale = 1;
+
+        // Try to fit 10 cards, reduce if scale gets too small
+        for (let tryCards = 10; tryCards >= 1; tryCards--) {
+            const neededWidth = tryCards * cardWidth + (tryCards - 1) * baseCardSpacing;
+            let tryScale = 1;
+            
+            if (neededWidth > this.containerWidth - (padding * 2)) {
+                tryScale = (this.containerWidth - (padding * 2)) / neededWidth;
+            }
+
+            if (tryScale >= minScale) {
+                cardsPerLine = tryCards;
+                scale = tryScale;
+                break;
+            }
+        }
 
         // Calculate number of lines
-        const numLines = Math.ceil(this.handCards.length / cardsPerLine);
+        const numLines = Math.ceil(cards.length / cardsPerLine);
 
-        // Calculate scale to fit everything in the container (1255 x 360)
-        const neededWidth = cardsPerLine * cardWidth + (cardsPerLine - 1) * baseCardSpacing;
+        // Recalculate scale based on height too
         const neededHeight = numLines * cardHeight + (numLines - 1) * lineSpacing;
-
-        let scale = 1;
-        if (neededWidth > this.containerWidth - (padding * 2)) {
-            scale = Math.min(scale, (this.containerWidth - (padding * 2)) / neededWidth);
-        }
         if (neededHeight > 360 - (padding * 2)) {
             scale = Math.min(scale, (360 - (padding * 2)) / neededHeight);
         }
@@ -138,31 +219,74 @@ export class MovementCardsScene {
         // Ensure all cards stay within bounds (0, 0) to (1255, 360)
         let cardIndex = 0;
         for (let lineIndex = 0; lineIndex < numLines; lineIndex++) {
-            const cardsInThisLine = Math.min(cardsPerLine, this.handCards.length - cardIndex);
+            const cardsInThisLine = Math.min(cardsPerLine, cards.length - cardIndex);
 
-            // Calculate total width of this line
-            const totalLineWidth = cardsInThisLine * scaledCardWidth + Math.max(0, (cardsInThisLine - 1) * scaledSpacing);
-            
-            // Center line horizontally within bounds
-            const startX = padding + (this.containerWidth - 2 * padding - totalLineWidth) / 2;
+            // Start from left edge
+            const startX = padding;
             const startY = padding + lineIndex * (scaledCardHeight + scaledLineSpacing);
 
-            // Ensure we stay within bounds
-            const clampedStartY = Math.min(startY, 360 - scaledCardHeight);
-
             for (let i = 0; i < cardsInThisLine; i++) {
-                const card = this.handCards[cardIndex];
+                const card = cards[cardIndex];
                 const imageKey = `card-${card.type}-${card.speed}.png`;
-                const xPos = startX + i * (scaledCardWidth + scaledSpacing);
-                
-                // Clamp X position to ensure card stays within bounds
-                const clampedXPos = Math.max(0, Math.min(xPos, this.containerWidth - scaledCardWidth));
-                
-                const sprite = this.scene.add.sprite(clampedXPos, clampedStartY, imageKey);
+                const xPos = startX + i * (scaledCardWidth + scaledSpacing) - scaledCardWidth;
+                 
+                const sprite = this.scene.add.sprite(xPos, startY, imageKey);
                 sprite.setOrigin(0, 0);
                 sprite.setCrop(170, 10, 240, 400);
-                sprite.setScale(scale);
+                sprite.setScale(0.8);
                 sprite.setDepth(cardIndex + 1);
+                sprite.setTint(0x00ff00);
+                
+                // Create precise hit area for this card (240x400 scaled by 0.8)
+                sprite.setInteractive(
+                    new Geom.Rectangle(170, 10, 240, 240),
+                    Geom.Rectangle.Contains
+                );
+                
+                // Store position info
+                this.cardPositions.push({ x: xPos, y: startY, index: cardIndex });
+                
+                // Highlight selected card
+                if (cardIndex === selectedIndex) {
+                    sprite.setScale(0.8 * 1.3); // Larger scale when selected
+                    sprite.setDepth(2000); // Bring to front
+                    sprite.setTint(0x00ff00); // Green tint when selected
+                }
+                
+                // Add hover effects
+                sprite.on('pointerover', () => {
+                    if (this.selectedCardIndex !== cardIndex) {
+                        sprite.setScale(0.81); // Increase scale by 15%
+                        sprite.setDepth(1000); // Bring to front on hover
+                    }
+                });
+                
+                sprite.on('pointerout', () => {
+                    if (this.selectedCardIndex !== cardIndex) {
+                        sprite.setScale(0.8); // Reset scale
+                        sprite.setDepth(cardIndex + 1); // Reset depth
+                    }
+                });
+                
+                // Card selection on click
+                sprite.on('pointerup', () => {
+                    if (this.selectedCardIndex === null) {
+                        // Select this card
+                        this.selectedCardIndex = cardIndex;
+                        this.tempCardOrder = [...this.handCards];
+                        this.renderHandWithSelection();
+                    } else if (this.selectedCardIndex === cardIndex) {
+                        // Deselect this card
+                        this.selectedCardIndex = null;
+                        this.tempCardOrder = null;
+                        this.renderHand();
+                    } else {
+                        // Select a different card
+                        this.selectedCardIndex = cardIndex;
+                        this.renderHandWithSelection();
+                    }
+                });
+                
                 this.movementCardsContainer.add(sprite);
                 this.cardSprites.push(sprite);
                 cardIndex++;
