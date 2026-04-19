@@ -35,6 +35,8 @@ export const Cards: Record<CardType, Record<CardSpeed, string>> = {
     }
 }
 
+type CardPlayCallback = (cardType: CardType, cardSpeed: CardSpeed, cardIndex: number) => void;
+
 export class MovementCardsScene {
 
     public movementCardsContainer: GameObjects.Container;
@@ -42,8 +44,7 @@ export class MovementCardsScene {
     private cardSprites: GameObjects.Sprite[] = [];
     private cardSpacing: number = 200; // Space between cards
     private scene: Scene;
-
-
+    private cardPlayCallback: CardPlayCallback | null = null;
 
     constructor(scene: Scene) {
         this.scene = scene;
@@ -86,6 +87,13 @@ export class MovementCardsScene {
         this.renderHand();
     }
 
+    /**
+     * Set callback for card play events
+     */
+    public onCardPlay(callback: CardPlayCallback): void {
+        this.cardPlayCallback = callback;
+    }
+
     preload() {
         this.scene.load.setPath('assets');
         for (const type of Object.values(CardType)) {
@@ -116,8 +124,29 @@ export class MovementCardsScene {
             sprite.setCrop(170, 10, 240, 400);
             sprite.setScale(1.1);
             sprite.setDepth(index + 1);
+            
+            // Make card interactive
+            sprite.setInteractive({ useHandCursor: true });
+            sprite.on('pointerdown', () => {
+                this.onCardClicked(card, index);
+            });
+            
             this.movementCardsContainer.add(sprite);
             this.cardSprites.push(sprite);
         });
+    }
+
+    private onCardClicked(card: { type: CardType; speed: CardSpeed }, index: number): void {
+        // Call the registered callback if set
+        if (this.cardPlayCallback) {
+            this.cardPlayCallback(card.type, card.speed, index);
+        }
+    }
+
+    /**
+     * Get the hand cards
+     */
+    public getHand(): Array<{ type: CardType; speed: CardSpeed }> {
+        return this.handCards;
     }
 }
