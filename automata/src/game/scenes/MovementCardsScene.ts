@@ -40,7 +40,7 @@ export class MovementCardsScene {
     public movementCardsContainer: GameObjects.Container;
     private handCards: Array<{ type: CardType; speed: CardSpeed }> = [];
     private cardSprites: GameObjects.Sprite[] = [];
-    private cardSpacing: number = 180; // Space between cards
+    private cardSpacing: number = 200; // Space between cards
     private scene: Scene;
 
 
@@ -48,11 +48,13 @@ export class MovementCardsScene {
     constructor(scene: Scene) {
         this.scene = scene;
         // Position container at the bottom center of the screen, with some padding
-        const containerY = this.scene.cameras.main.height - 150;
-        this.movementCardsContainer = this.scene.add.container(this.scene.cameras.main.width / 4, containerY);
+        const containerY = this.scene.cameras.main.height - 380;
+        this.movementCardsContainer = this.scene.add.container(440, containerY);
+        this.movementCardsContainer.setDepth(100);
         
         // Debug: Add a visible background to verify container is positioned correctly
-        const bg = this.scene.add.rectangle(0, 0, 500, 250, 0x222222);
+        const bg = this.scene.add.rectangle(0, 0, 1255, 360, 0x222222, 0.5);
+        bg.setOrigin(0, 0);
         this.movementCardsContainer.add(bg);
     }
 
@@ -103,17 +105,17 @@ export class MovementCardsScene {
 
         // Calculate total width needed
         const totalWidth = (this.handCards.length - 1) * this.cardSpacing;
-        const startX = -totalWidth / 2;
+        const startX = -this.cardSpacing -30;
 
         // Add cards to container
         this.handCards.forEach((card, index) => {
             const imageKey = `card-${card.type}-${card.speed}.png`;
-            const sprite = this.scene.add.sprite(0 + index * this.cardSpacing, -120, imageKey);
+            const sprite = this.scene.add.sprite(startX + index * this.cardSpacing, 0, imageKey);
             sprite.setOrigin(0, 0);
             // Crop to show only the card (from the 1920x1080 image)
             sprite.setCrop(170, 10, 240, 400);
-            // Set display size to make it visible
-            sprite.setDisplaySize(1920, 1080);
+            sprite.setScale(1.1);
+            sprite.setDepth(index + 1);
             this.movementCardsContainer.add(sprite);
             this.cardSprites.push(sprite);
         });
