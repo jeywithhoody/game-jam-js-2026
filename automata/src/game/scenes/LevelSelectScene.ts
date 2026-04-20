@@ -17,7 +17,7 @@ export class LevelSelectScene extends Scene {
     ];
 
     constructor() {
-        super('LevelSelect');
+        super(SceneNames.LevelSelect);
     }
 
     create() {

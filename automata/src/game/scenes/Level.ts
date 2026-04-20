@@ -2,6 +2,8 @@ import { Scene, Button, SceneManager, Text, Sprite, Tweens } from 'phaser';
 import { Timer } from '../util/Timer';
 import { LevelGrid } from '../grid/LevelGrid';
 import { CardType, CardSpeed } from './MovementCardsScene';
+import { ActionZoneSystem } from '../util/ActionZoneSystem';
+import SceneNames from './SceneName';
 
 export class Level extends Scene
 {
@@ -11,12 +13,16 @@ export class Level extends Scene
     protected robotSprite: Sprite = null;
     protected levelZoneX: number = 445;
     protected levelZoneY: number = 65;
-    private isMoving: boolean = false;
+    protected isRobotMoving: boolean = false;
+    protected actionZoneSystem: ActionZoneSystem = null;
+    protected startX: number = 0;
+    protected startY: number = 0;
 
     constructor(levelName: string)
     {
         super(levelName);
         this.timer = new Timer(400);
+        this.actionZoneSystem = new ActionZoneSystem();
     }
 
     /**
@@ -61,8 +67,47 @@ export class Level extends Scene
         this.add.image(0, 0, 'background')
         .setOrigin(0)
         .setDisplaySize(this.scale.width, this.scale.height);
-        this.timerText = this.add.text(0, 0, 'Timer : ' + this.timer.getTime());
+        
+        // Position timer text better (top center)
+        this.timerText = this.add.text(this.scale.width / 2, 30, 'Timer: 400s', {
+            fontSize: '24px',
+            color: '#ffffff',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        this.timerText.setOrigin(0.5, 0);
+        this.timerText.setDepth(50);
+        
         this.timer.reset();
+        this.draw();
+
+        // Set up pause menu (Escape key)
+        this.input.keyboard.on('keydown-ESC', () => {
+            this.pauseGame();
+        });
+    }
+
+    /**
+     * Pause the game and show pause menu
+     */
+    protected pauseGame(): void {
+        this.scene.pause();
+        this.scene.launch(SceneNames.PauseMenu);
+    }
+
+    /**
+     * Handle pause menu resume (called by PauseMenuScene)
+     */
+    public resumeFromPause(): void {
+        this.scene.resume();
+        this.scene.stop(SceneNames.PauseMenu);
+    }
+
+    /**
+     * Get the isMoving state
+     */
+    public get isMoving(): boolean {
+        return this.isRobotMoving;
     }
 
     protected createRobotSprite(): void {
@@ -78,7 +123,7 @@ export class Level extends Scene
             'robot-profil0000'
         );
         this.robotSprite.setOrigin(0.5, 0.5);
-        this.robotSprite.setDisplaySize(40, 60);
+        this.robotSprite.setDisplaySize(80, 120);
         this.robotSprite.setDepth(100);
     }
 
@@ -90,7 +135,7 @@ export class Level extends Scene
 
     draw()
     {
-        this.timerText.setText('Timer : ' + Math.ceil(this.timer.getTime() / 1000));
+        this.timerText.setText('Timer: ' + Math.ceil(this.timer.getTime() / 1000) + 's');
     }
 
     /**
@@ -104,7 +149,7 @@ export class Level extends Scene
      * Handle card play - move robot based on card type and speed
      */
     public playCard(cardType: CardType, cardSpeed: CardSpeed): boolean {
-        if (this.isMoving || !this.levelGrid || !this.robotSprite) {
+        if (this.isRobotMoving || !this.levelGrid || !this.robotSprite) {
             return false;
         }
 
@@ -120,7 +165,7 @@ export class Level extends Scene
         }
 
         // Execute move
-        this.isMoving = true;
+        this.isRobotMoving = true;
         this.levelGrid.moveRobot(direction, distance);
 
         // Animate robot
@@ -169,7 +214,7 @@ export class Level extends Scene
             duration: 400,
             ease: 'Linear',
             onComplete: () => {
-                this.isMoving = false;
+                this.isRobotMoving = false;
                 this.onRobotMovementComplete();
             }
         });
