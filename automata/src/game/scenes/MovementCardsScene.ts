@@ -4,7 +4,9 @@ export enum CardType {
     MoveLeft = 'move-left',
     MoveUp = 'move-up',
     MoveDown = 'move-down',
-    MoveRight = 'move-right'
+    MoveRight = 'move-right',
+    Take = 'take',
+    Drop = 'drop',
 }
 
 export enum CardSpeed {
@@ -44,6 +46,14 @@ export const Cards: Record<CardType, Record<CardSpeed, CardInfo>> = {
     'move-right': {
         '1': { path: getCardName(CardType.MoveRight, 1), cropZone: { x: 400, y: 40, w: 169, h: 230 } },
         '2': { path: getCardName(CardType.MoveRight, 2), cropZone: { x: 580, y: 40, w: 169, h: 230 }  }
+    },
+    'take': {
+        '1': { path: getCardName(CardType.Take, 1), cropZone: { x: 1480, y: 40, w: 165, h: 227 } },
+        '2': { path: getCardName(CardType.Take, 2), cropZone: { x: 1480, y: 40, w: 165, h: 227 } },
+    },
+    'drop': {
+            '1': { path: getCardName(CardType.Drop, 1), cropZone: { x: 1660, y: 40, w: 165, h: 227 } },
+            '2': { path: getCardName(CardType.Drop, 2), cropZone: { x: 1660, y: 40, w: 165, h: 227 } },
     }
 }
 
