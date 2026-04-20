@@ -1,6 +1,13 @@
 import { Scene, GameObjects, Input } from 'phaser';
 import { LevelMetadata } from '../util/LevelMetadata';
 
+const padding = 10;
+const panelPosition = { x: 51, y: 123 };
+const panelSize = { width: 317, height: 434 };
+const textZone = 75;
+
+// Position: 51, 123
+// Size: 317, 434
 export class LevelInfoScene extends Scene {
     private levelMetadata: LevelMetadata;
     private infoContainer: GameObjects.Container;
@@ -30,7 +37,7 @@ export class LevelInfoScene extends Scene {
         // bg.setDepth(0);
 
         // Create container for info
-        this.infoContainer = this.add.container(10, 20);
+        this.infoContainer = this.add.container(panelPosition.x + padding, panelPosition.y + textZone + padding);
         this.infoContainer.setDepth(10);
 
         if (this.levelMetadata) {
