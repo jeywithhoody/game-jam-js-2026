@@ -1,14 +1,22 @@
-import { Scene, GameObjects } from 'phaser';
+import { Scene, GameObjects, Geom } from 'phaser';
 
 export class DeckScene {
     private scene: Scene;
     private deckContainer: GameObjects.Container;
     private cardCount: number = 30; // Number of cards in the deck
     private cardBackImage: string = 'card-back';
+    private onCardClick: (() => void) | null = null;
 
     constructor(scene: Scene) {
         this.scene = scene;
         this.createDeck();
+    }
+
+    /**
+     * Set callback when a card is clicked
+     */
+    public setOnCardClick(callback: () => void) {
+        this.onCardClick = callback;
     }
 
     private createDeck() {
@@ -49,6 +57,15 @@ export class DeckScene {
             //card.setDisplaySize(1920, 1080);
             card.setDepth(i); // Layer cards on top of each other
             card.setScale(1.5); // Scale down for better fit
+            
+            // Make the top card interactive
+            if (i === visibleCards - 1) {
+                // Set interactive zone to match the crop dimensions (240x400)
+                const hitArea = new Geom.Rectangle(170, 10, 240, 400);
+                card.setInteractive(hitArea, Geom.Rectangle.Contains);
+                card.on('pointerdown', () => this.handleCardClick());
+            }
+            
             this.deckContainer.add(card);
         }
 
@@ -72,6 +89,15 @@ export class DeckScene {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Handle card click event
+     */
+    private handleCardClick() {
+        if (this.drawCard() && this.onCardClick) {
+            this.onCardClick();
+        }
     }
 
     /**

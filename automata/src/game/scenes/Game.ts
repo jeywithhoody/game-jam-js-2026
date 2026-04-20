@@ -1,4 +1,5 @@
-import { Scene, Button, SceneManager } from 'phaser';
+
+import { Scene, Utils, Button, SceneManager } from 'phaser';
 import { Cards, MovementCardsScene, CardType, CardSpeed } from './MovementCardsScene.ts';
 import { DeckScene } from './DeckScene.ts';
 import { LevelZoneScene } from './LevelZoneScene.ts';
@@ -8,7 +9,6 @@ export class Game extends Scene
 {
     private cardScene: MovementCardsScene;
     private deckScene: DeckScene;
-    private levelZoneScene: LevelZoneScene;
     constructor ()
     {
         super('Game');
@@ -38,16 +38,9 @@ export class Game extends Scene
         this.load.image('washer-machine-run5', 'washer-machine-run5.png');
         this.load.image('washer-machine-run6', 'washer-machine-run6.png');
 
-        // Load card images
-        for (const type of Object.values(CardType)) {
-            for (const speed of [1, 2]) {
-                const cardKey = `card-${type}-${speed}.png`;
-                this.load.image(cardKey, cardKey);
-            }
-        }
-
-        // Load card back image for deck
         this.load.image('card-back', 'card-back.png');
+        // Load combined cards PNG
+        this.load.image('cards-combined', 'cards.png');
 
         // Initialize movement cards scene
         this.cardScene = new MovementCardsScene(this);
@@ -192,22 +185,46 @@ export class Game extends Scene
             }
         });
 
-        // Display sample hand of movement cards
-        this.cardScene.setHand([
-            { type: CardType.MoveRight, speed: 1 },
-            { type: CardType.MoveUp, speed: 2 },
-            { type: CardType.MoveDown, speed: 1 },
-            { type: CardType.MoveLeft, speed: 2 },
-            { type: CardType.MoveRight, speed: 2 }
-        ]);
+        // // Display sample hand of movement cards
+        // this.cardScene.setHand([
+        //     { type: CardType.MoveRight, speed: 1 },
+        //     { type: CardType.MoveUp, speed: 2 },
+        //     { type: CardType.MoveDown, speed: 1 },
+        //     { type: CardType.MoveLeft, speed: 2 },
+        //     { type: CardType.MoveRight, speed: 2 }
+        // ]);
 
         // Initialize deck scene after assets are loaded
         this.deckScene = new DeckScene(this);
+
         // Initialize level zone scene
         this.levelZoneScene = new LevelZoneScene(this);
 
         // Go to level select scene
         this.scene.start(SceneNames.LevelSelect);
+
+        // Set up callback for when deck card is clicked
+        this.deckScene.setOnCardClick(() => this.drawNewCards());
+
+        // Initialize level zone scene
+        new LevelZoneScene(this);
+    }
+
+    /**
+     * Draw new random movement cards when deck is clicked
+     */
+    private drawNewCards() {
+        const cardTypes = Object.values(CardType);
+        const cardSpeeds: CardSpeed[] = [CardSpeed.One, CardSpeed.Two];
+
+        // Generate random cards (let's say 3-5 cards)
+
+        for (let i = 0; i < 1; i++) {
+            const type = Utils.Array.GetRandom(cardTypes) as CardType;
+            const speed = Utils.Array.GetRandom(cardSpeeds) as CardSpeed;
+            // Add the new card to the existing hand
+            this.cardScene.addCardToHand(type, speed);
+        }
     }
 
     update(time: number, delta: number)
