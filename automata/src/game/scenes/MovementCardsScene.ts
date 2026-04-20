@@ -78,7 +78,9 @@ export class MovementCardsScene {
     private containerWidth: number = 1255; // Width of the movement cards area
     private selectedCardIndex: number | null = null;
     private tempCardOrder: Array<{ type: CardType; speed: CardSpeed }> | null = null;
-
+    private cardPositions: Array<{ x: number; y: number; index: number }> = [];
+    private onCardReturnedToDeck: (() => void) | null = null;
+  
     constructor(scene: Scene) {
         this.scene = scene;
         // Position container at the bottom center of the screen, with some padding
@@ -133,6 +135,31 @@ export class MovementCardsScene {
             this.tempCardOrder = null;
             this.renderHand();
         });
+
+        this.scene.input.keyboard?.on('keydown-X', () => {
+            if (this.selectedCardIndex !== null && this.tempCardOrder !== null) {
+                // Remove the card from the hand completely
+                this.tempCardOrder.splice(this.selectedCardIndex, 1);
+                
+                // Apply the change and clear selection
+                this.handCards = [...this.tempCardOrder];
+                this.selectedCardIndex = null;
+                this.tempCardOrder = null;
+                this.renderHand();
+                
+                // Notify that a card was returned to the deck
+                if (this.onCardReturnedToDeck) {
+                    this.onCardReturnedToDeck();
+                }
+            }
+        });
+    }
+
+    /**
+     * Set callback when a card is returned to the deck
+     */
+    public setOnCardReturnedToDeck(callback: () => void) {
+        this.onCardReturnedToDeck = callback;
     }
 
     private createGoButton(): void {
