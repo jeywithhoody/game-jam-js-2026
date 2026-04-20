@@ -1,5 +1,5 @@
-import { Scene, Math, Utils } from 'phaser';
-import { Cards, MovementCardsScene, CardType, CardSpeed } from './MovementCardsScene.ts';
+import { Scene, Utils } from 'phaser';
+import { MovementCardsScene, CardType, CardSpeed } from './MovementCardsScene.ts';
 import { DeckScene } from './DeckScene.ts';
 import { LevelZoneScene } from './LevelZoneScene.ts';
 
@@ -7,7 +7,6 @@ export class Game extends Scene
 {
     private cardScene: MovementCardsScene;
     private deckScene: DeckScene;
-    private levelZoneScene: LevelZoneScene;
     constructor ()
     {
         super('Game');
@@ -37,16 +36,9 @@ export class Game extends Scene
         this.load.image('washer-machine-run5', 'washer-machine-run5.png');
         this.load.image('washer-machine-run6', 'washer-machine-run6.png');
 
-        // Load card images
-        for (const type of Object.values(CardType)) {
-            for (const speed of [1, 2]) {
-                const cardKey = `card-${type}-${speed}.png`;
-                this.load.image(cardKey, cardKey);
-            }
-        }
-
-        // Load card back image for deck
         this.load.image('card-back', 'card-back.png');
+        // Load combined cards PNG
+        this.load.image('cards-combined', 'cards.png');
 
         // Initialize movement cards scene
         this.cardScene = new MovementCardsScene(this);
@@ -207,7 +199,7 @@ export class Game extends Scene
         this.deckScene.setOnCardClick(() => this.drawNewCards());
 
         // Initialize level zone scene
-        this.levelZoneScene = new LevelZoneScene(this);
+        new LevelZoneScene(this);
     }
 
     /**
