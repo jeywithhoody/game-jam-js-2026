@@ -1,14 +1,18 @@
-import { Scene, Button, SceneManager, Text, Sprite, Tweens } from 'phaser';
+import { Scene, Utils, Button, SceneManager, Text, Sprite, Tweens } from 'phaser';
 import { Timer } from '../util/Timer';
 import { LevelGrid } from '../grid/LevelGrid';
-import { CardType, CardSpeed } from './MovementCardsScene';
+import { DeckScene } from './DeckScene';
+import { CardType, CardSpeed, MovementCardsScene } from './MovementCardsScene';
 import { ActionZoneSystem } from '../util/ActionZoneSystem';
 import SceneNames from './SceneName';
 
 export class Level extends Scene
 {
     protected timer : Timer = null;
+    protected cardScene: MovementCardsScene;
     private timerText : Text = null;
+    private deckScene : Scene = null;
+
     protected levelGrid: LevelGrid = null;
     protected robotSprite: Sprite = null;
     protected levelZoneX: number = 445;
@@ -85,6 +89,32 @@ export class Level extends Scene
         this.input.keyboard.on('keydown-ESC', () => {
             this.pauseGame();
         });
+
+        // Initialize deck scene after assets are loaded
+        this.deckScene = new DeckScene(this);
+
+        // Set up callback for when deck card is clicked
+        this.deckScene.setOnCardClick(() => this.drawNewCards());
+
+        // Initialize movement cards scene
+        this.cardScene = new MovementCardsScene(this);
+    }
+
+    /**
+     * Draw new random movement cards when deck is clicked
+     */
+    private drawNewCards() {
+        const cardTypes = Object.values(CardType);
+        const cardSpeeds: CardSpeed[] = [CardSpeed.One, CardSpeed.Two];
+
+        // Generate random cards (let's say 3-5 cards)
+
+        for (let i = 0; i < 1; i++) {
+            const type = Utils.Array.GetRandom(cardTypes) as CardType;
+            const speed = Utils.Array.GetRandom(cardSpeeds) as CardSpeed;
+            // Add the new card to the existing hand
+            this.cardScene.addCardToHand(type, speed);
+        }
     }
 
     /**
@@ -122,8 +152,10 @@ export class Level extends Scene
             this.levelZoneY + worldPos.y,
             'robot-profil0000'
         );
-        this.robotSprite.setOrigin(0.5, 0.5);
-        this.robotSprite.setDisplaySize(80, 120);
+        this.robotSprite.setOrigin(0.5, 0.3);
+        // this.robotSprite.setDisplaySize(149, 205);
+        this.robotSprite.setCrop(854, 217, 149, 205);
+        this.robotSprite.setScale(0.6, 0.6);
         this.robotSprite.setDepth(100);
     }
 
@@ -233,18 +265,22 @@ export class Level extends Scene
             case 'up':
                 this.robotSprite.setTexture('robot-back0000');
                 this.robotSprite.setFlipX(false);
+                this.robotSprite.setCrop(27, 10, 173, 224);
                 break;
             case 'down':
                 this.robotSprite.setTexture('robot-front0000');
                 this.robotSprite.setFlipX(false);
+                this.robotSprite.setCrop(16, 19, 193, 213);
                 break;
             case 'left':
                 this.robotSprite.setTexture('robot-profil0000');
                 this.robotSprite.setFlipX(true);
+                this.robotSprite.setCrop(854, 217, 149, 205);
                 break;
             case 'right':
                 this.robotSprite.setTexture('robot-profil0000');
                 this.robotSprite.setFlipX(false);
+                this.robotSprite.setCrop(854, 217, 149, 205);
                 break;
         }
     }

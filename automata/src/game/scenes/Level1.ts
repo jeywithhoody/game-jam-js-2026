@@ -17,7 +17,6 @@ import { LevelInfoScene } from './LevelInfoScene';
 export class Level1 extends Level
 {
     private levelZoneScene: LevelZoneScene;
-    private movementCardsScene: MovementCardsScene;
     private levelInfoScene: LevelInfoScene;
     private levelMetadata: LevelMetadata = Level1Metadata;
     private completedActions: Set<string> = new Set();
@@ -68,26 +67,23 @@ export class Level1 extends Level
         // Initialize level zone scene with grid visuals
         this.levelZoneScene = new LevelZoneScene(this);
         this.levelZoneScene.initializeGridVisuals(this.levelGrid);
-
-        // Initialize movement cards scene
-        this.movementCardsScene = new MovementCardsScene(this);
         
         // Set up a sample hand of cards
-        this.movementCardsScene.setHand([
-            { type: CardType.MoveRight, speed: CardSpeed.One },
-            { type: CardType.MoveUp, speed: CardSpeed.Two },
-            { type: CardType.MoveDown, speed: CardSpeed.One },
-            { type: CardType.MoveLeft, speed: CardSpeed.Two },
-            { type: CardType.MoveRight, speed: CardSpeed.Two }
-        ]);
+        // this.movementCardsScene.setHand([
+        //     { type: CardType.MoveRight, speed: CardSpeed.One },
+        //     { type: CardType.MoveUp, speed: CardSpeed.Two },
+        //     { type: CardType.MoveDown, speed: CardSpeed.One },
+        //     { type: CardType.MoveLeft, speed: CardSpeed.Two },
+        //     { type: CardType.MoveRight, speed: CardSpeed.Two }
+        // ]);
 
         // Set up card play callback for individual card clicks
-        this.movementCardsScene.onCardPlay((cardType, cardSpeed, cardIndex) => {
+        this.cardScene.onCardPlay((cardType, cardSpeed, cardIndex) => {
             this.onCardPlayed({ cardType, cardSpeed, cardIndex });
         });
 
         // Set up card sequence callback for Go button
-        this.movementCardsScene.onCardSequence(async (cards) => {
+        this.cardScene.onCardSequence(async (cards) => {
             await this.executeCardSequence(cards);
         });
     }
@@ -169,7 +165,7 @@ export class Level1 extends Level
 
         if (success) {
             // Remove the card from hand after successful move
-            this.movementCardsScene.removeCardFromHand(data.cardIndex);
+            this.cardScene.removeCardFromHand(data.cardIndex);
         } else {
             console.log('Move was invalid or robot is already moving');
         }
@@ -213,7 +209,7 @@ export class Level1 extends Level
         }
 
         // Remove all cards from hand
-        this.movementCardsScene.clearHand();
+        this.cardScene.clearHand();
         this.isExecutingSequence = false;
 
         // Check win condition

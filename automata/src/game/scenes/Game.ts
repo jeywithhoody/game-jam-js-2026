@@ -1,4 +1,3 @@
-
 import { Scene, Utils, Button, SceneManager } from 'phaser';
 import { Cards, MovementCardsScene, CardType, CardSpeed } from './MovementCardsScene.ts';
 import { DeckScene } from './DeckScene.ts';
@@ -23,7 +22,7 @@ export class Game extends Scene
         this.load.image('robot-front0003', 'robot-front0003.png');
         this.load.image('robot-front0006', 'robot-front0006.png');
         this.load.image('robot-front0009', 'robot-front0009.png');
-        this.load.image('robot-profil0000', 'robot-profil0000.png');
+        // this.load.image('robot-profil0000', 'robot-profil0000.png');
         this.load.image('robot-profil0003', 'robot-profil0003.png');
         this.load.image('robot-profil0006', 'robot-profil0006.png');
         this.load.image('robot-profil0009', 'robot-profil0009.png');

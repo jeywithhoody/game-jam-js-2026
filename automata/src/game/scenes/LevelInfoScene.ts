@@ -21,13 +21,13 @@ export class LevelInfoScene extends Scene {
 
     create() {
         // Create background
-        const bg = this.add.rectangle(
-            0, 0,
-            310, this.scale.height,
-            0x1a3a2a, 1
-        );
-        bg.setOrigin(0, 0);
-        bg.setDepth(0);
+        // const bg = this.add.rectangle(
+        //     0, 0,
+        //     310, this.scale.height,
+        //     0x1a3a2a, 1
+        // );
+        // bg.setOrigin(0, 0);
+        // bg.setDepth(0);
 
         // Create container for info
         this.infoContainer = this.add.container(10, 20);
