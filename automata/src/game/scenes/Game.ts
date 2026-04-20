@@ -1,7 +1,8 @@
-import { Scene, Utils } from 'phaser';
-import { MovementCardsScene, CardType, CardSpeed } from './MovementCardsScene.ts';
+import { Scene, Utils, Button, SceneManager } from 'phaser';
+import { Cards, MovementCardsScene, CardType, CardSpeed } from './MovementCardsScene.ts';
 import { DeckScene } from './DeckScene.ts';
 import { LevelZoneScene } from './LevelZoneScene.ts';
+import SceneNames from './SceneName';
 
 export class Game extends Scene
 {
@@ -21,7 +22,7 @@ export class Game extends Scene
         this.load.image('robot-front0003', 'robot-front0003.png');
         this.load.image('robot-front0006', 'robot-front0006.png');
         this.load.image('robot-front0009', 'robot-front0009.png');
-        this.load.image('robot-profil0000', 'robot-profil0000.png');
+        // this.load.image('robot-profil0000', 'robot-profil0000.png');
         this.load.image('robot-profil0003', 'robot-profil0003.png');
         this.load.image('robot-profil0006', 'robot-profil0006.png');
         this.load.image('robot-profil0009', 'robot-profil0009.png');
@@ -195,6 +196,12 @@ export class Game extends Scene
         // Initialize deck scene after assets are loaded
         this.deckScene = new DeckScene(this);
 
+        // Initialize level zone scene
+        this.levelZoneScene = new LevelZoneScene(this);
+
+        // Go to level select scene
+        this.scene.start(SceneNames.LevelSelect);
+
         // Set up callback for when deck card is clicked
         this.deckScene.setOnCardClick(() => this.drawNewCards());
 
@@ -222,5 +229,9 @@ export class Game extends Scene
             // Add the new card to the existing hand
             this.cardScene.addCardToHand(type, speed);
         }
+    }
+
+    update(time: number, delta: number)
+    {
     }
 }

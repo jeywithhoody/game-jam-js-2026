@@ -1,4 +1,5 @@
 import { Scene, GameObjects } from 'phaser';
+import { LevelGrid } from '../grid/LevelGrid';
 
 interface LevelZone {
     x: number;
@@ -15,6 +16,8 @@ export class LevelZoneScene {
     private gridCols: number = 3;
     private gridRows: number = 2;
     private padding: number = 20;
+    private levelGrid: LevelGrid = null;
+    private gridVisualsContainer: GameObjects.Container = null;
 
     constructor(scene: Scene) {
         this.scene = scene;
@@ -25,79 +28,139 @@ export class LevelZoneScene {
         this.levelZoneContainer = this.scene.add.container(445, 65);
         this.levelZoneContainer.setDepth(50);
 
+        // Create a sub-container for grid visuals
+        this.gridVisualsContainer = this.scene.add.container(0, 0);
+        this.levelZoneContainer.add(this.gridVisualsContainer);
+
         // Debug: Add a visible background to verify container is positioned correctly
         const bg = this.scene.add.rectangle(0, 0, 1435, 580, 0x222222, 0.5);
         bg.setOrigin(0, 0);
         this.levelZoneContainer.add(bg);
     }
 
-    private createZoneVisuals(zone: LevelZone) {
-        // Create zone rectangle background
-        const rect = this.scene.add.rectangle(
-            zone.x,
-            zone.y,
-            this.zoneSize,
-            this.zoneSize,
-            0x4a4a4a,
-            0.6
+    /**
+     * Initialize the grid visuals from a LevelGrid
+     */
+    public initializeGridVisuals(grid: LevelGrid): void {
+        this.levelGrid = grid;
+        this.renderGridVisuals();
+    }
+
+    private renderGridVisuals(): void {
+        if (!this.levelGrid) return;
+
+        // Clear existing grid visuals
+        this.gridVisualsContainer.removeAll(true);
+
+        const dims = this.levelGrid.getGridDimensions();
+        const movementGrid = this.levelGrid.getMovementGrid();
+        const actionZones = this.levelGrid.getActionZones();
+        const robotPos = this.levelGrid.getRobotPosition();
+
+        // Draw grid cells
+        for (let row = 0; row < dims.rows; row++) {
+            for (let col = 0; col < dims.cols; col++) {
+                const cell = movementGrid[row][col];
+                const cellX = col * dims.cellWidth;
+                const cellY = row * dims.cellHeight;
+
+                // Draw cell background
+                const cellColor = cell.walkable ? 0x4a4a4a : 0x8b0000;
+                const rect = this.scene.add.rectangle(
+                    cellX,
+                    cellY,
+                    dims.cellWidth,
+                    dims.cellHeight,
+                    cellColor,
+                    0.4
+                );
+                rect.setOrigin(0, 0);
+                rect.setStrokeStyle(1, 0xcccccc);
+                this.gridVisualsContainer.add(rect);
+
+                // Draw cell coordinate text for debugging
+                const text = this.scene.add.text(
+                    cellX + dims.cellWidth / 2,
+                    cellY + dims.cellHeight / 2,
+                    `(${col},${row})`,
+                    {
+                        fontSize: '12px',
+                        color: '#999999',
+                        align: 'center'
+                    }
+                );
+                text.setOrigin(0.5, 0.5);
+                this.gridVisualsContainer.add(text);
+            }
+        }
+
+        // Draw action zones with special markers
+        actionZones.forEach(zone => {
+            const zoneX = zone.x * dims.cellWidth;
+            const zoneY = zone.y * dims.cellHeight;
+
+            // Draw action zone indicator
+            const actionColor = zone.actionType === 'put' ? 0x4169E1 : 0x32CD32;
+            const actionMarker = this.scene.add.rectangle(
+                zoneX + dims.cellWidth / 2,
+                zoneY + dims.cellHeight / 2,
+                dims.cellWidth * 0.6,
+                dims.cellHeight * 0.6,
+                actionColor,
+                0.6
+            );
+            actionMarker.setOrigin(0.5, 0.5);
+            actionMarker.setStrokeStyle(2, 0xffffff);
+            this.gridVisualsContainer.add(actionMarker);
+
+            // Draw action type label
+            const actionLabel = this.scene.add.text(
+                zoneX + dims.cellWidth / 2,
+                zoneY + dims.cellHeight / 2,
+                zone.actionType.toUpperCase()[0],
+                {
+                    fontSize: '14px',
+                    fontStyle: 'bold',
+                    color: '#ffffff',
+                    align: 'center'
+                }
+            );
+            actionLabel.setOrigin(0.5, 0.5);
+            this.gridVisualsContainer.add(actionLabel);
+        });
+
+        // Draw robot position
+        const robotCellX = robotPos.x * dims.cellWidth;
+        const robotCellY = robotPos.y * dims.cellHeight;
+        const robotMarker = this.scene.add.rectangle(
+            robotCellX + dims.cellWidth / 2,
+            robotCellY + dims.cellHeight / 2,
+            dims.cellWidth * 0.4,
+            dims.cellHeight * 0.4,
+            0xFF6347,
+            0.8
         );
-        rect.setOrigin(0, 0);
-        rect.setStrokeStyle(2, 0xcccccc);
-        this.levelZoneContainer.add(rect);
-
-        // Add washer machine animation if zone has washer
-        if (zone.hasWasher) {
-            this.createWasherAnimation(zone);
-        }
-
-        // Add robot if zone has robot
-        if (zone.hasRobot) {
-            this.createRobotDisplay(zone);
-        }
-    }
-
-    private createWasherAnimation(zone: LevelZone) {
-        // Create washer machine animation
-        const washerX = zone.x + this.zoneSize / 2 - 40;
-        const washerY = zone.y + this.zoneSize / 2 - 40;
-
-        const washerSprite = this.scene.add.sprite(washerX, washerY, 'washer-machine-run1');
-        washerSprite.setOrigin(0, 0);
-        washerSprite.setDisplaySize(80, 80);
-
-        // Create animation for washer machine
-        if (!this.scene.anims.exists('washer-run')) {
-            this.scene.anims.create({
-                key: 'washer-run',
-                frames: [
-                    { key: 'washer-machine-run1' },
-                    { key: 'washer-machine-run2' },
-                    { key: 'washer-machine-run3' },
-                    { key: 'washer-machine-run5' },
-                    { key: 'washer-machine-run6' }
-                ],
-                frameRate: 8,
-                repeat: -1
-            });
-        }
-
-        washerSprite.play('washer-run');
-        this.levelZoneContainer.add(washerSprite);
-    }
-
-    private createRobotDisplay(zone: LevelZone) {
-        // Display static robot in profile view
-        const robotX = zone.x + this.zoneSize / 2 - 20;
-        const robotY = zone.y + this.zoneSize - 50;
-
-        const robotSprite = this.scene.add.sprite(robotX, robotY, 'robot-profil0000');
-        robotSprite.setOrigin(0.5, 1); // Center horizontally, anchor at bottom
-        robotSprite.setDisplaySize(40, 60);
-        this.levelZoneContainer.add(robotSprite);
+        robotMarker.setOrigin(0.5, 0.5);
+        robotMarker.setStrokeStyle(2, 0xFFFFFF);
+        this.gridVisualsContainer.add(robotMarker);
     }
 
     /**
-     * Add a new zone to the level
+     * Get the container for further manipulation
+     */
+    public getContainer(): GameObjects.Container {
+        return this.levelZoneContainer;
+    }
+
+    /**
+     * Get all zones (for legacy compatibility)
+     */
+    public getZones(): LevelZone[] {
+        return this.zones;
+    }
+
+    /**
+     * Add a new zone to the level (for legacy compatibility)
      */
     public addZone(hasWasher: boolean = false, hasRobot: boolean = false) {
         // Calculate position for new zone
@@ -116,20 +179,5 @@ export class LevelZoneScene {
 
         const zone: LevelZone = { x: zoneX, y: zoneY, hasWasher, hasRobot };
         this.zones.push(zone);
-        this.createZoneVisuals(zone);
-    }
-
-    /**
-     * Get the container for further manipulation
-     */
-    public getContainer(): GameObjects.Container {
-        return this.levelZoneContainer;
-    }
-
-    /**
-     * Get all zones
-     */
-    public getZones(): LevelZone[] {
-        return this.zones;
     }
 }
