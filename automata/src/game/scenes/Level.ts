@@ -6,6 +6,9 @@ import { CardType, CardSpeed, MovementCardsScene } from './MovementCardsScene';
 import { ActionZoneSystem } from '../util/ActionZoneSystem';
 import SceneNames from './SceneName';
 
+
+//TODO : create Take and Drop association (Need 1 Take for 1 Drop)
+//TODO : not drop when not the right Take
 export class Level extends Scene
 {
     protected timer : Timer = null;
@@ -183,6 +186,28 @@ export class Level extends Scene
     public playCard(cardType: CardType, cardSpeed: CardSpeed): boolean {
         if (this.isRobotMoving || !this.levelGrid || !this.robotSprite) {
             return false;
+        }
+
+        const isMovement = cardType !== CardType.Drop && cardType !== CardType.Take
+
+        if(!isMovement) {
+
+            const { x, y } = this.levelGrid.getRobotPosition();
+            const actionZone = this.levelGrid.getActionZoneAt(x, y);
+
+            if(actionZone === undefined) {
+                return false;
+            }
+
+            if(cardType === CardType.Take && actionZone.actionType !== 'take') {
+                return false;
+            }
+
+            if(cardType === CardType.Drop && actionZone.actionType !== 'put') {
+                return false;
+            }
+
+            return true;
         }
 
         const direction = this.cardTypeToDirection(cardType);

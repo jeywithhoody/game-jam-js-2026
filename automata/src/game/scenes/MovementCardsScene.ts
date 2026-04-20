@@ -1,5 +1,8 @@
 import { Scene, GameObjects, Geom, Input } from 'phaser';
 
+//TODO : add posssibility to reshuffle cards
+//TODO : create a card dictionary (have particular number that adapts to level)
+
 export enum CardType {
     MoveLeft = 'move-left',
     MoveUp = 'move-up',
