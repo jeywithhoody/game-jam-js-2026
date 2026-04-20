@@ -198,6 +198,11 @@ export class Game extends Scene
         // Set up callback for when deck card is clicked
         this.deckScene.setOnCardClick(() => this.drawNewCards());
 
+        // Set up callback for when a card is returned to the deck
+        this.cardScene.setOnCardReturnedToDeck(() => {
+            this.deckScene.addCards(1);
+        });
+
         // Initialize level zone scene
         new LevelZoneScene(this);
     }
