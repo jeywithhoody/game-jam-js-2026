@@ -71,6 +71,7 @@ export class Level extends Scene
         this.load.image('card-move-right-2', 'card-move-right-2.png');
         this.load.image('card-move-up-1', 'card-move-up-1.png');
         this.load.image('card-move-up-2', 'card-move-up-2.png');
+        this.load.image('failed-panel', 'failed-panel.png');
     }
 
     create()

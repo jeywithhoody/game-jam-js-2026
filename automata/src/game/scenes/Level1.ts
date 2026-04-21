@@ -173,6 +173,26 @@ export class Level1 extends Level
     }
 
     /**
+     * Show failed panel when a card fails
+     */
+    private showFailedPanel(): void {
+        // Position panel above the card scene area
+        this.cardScene.showFailedPanel();
+
+        // Add click to close functionality
+        // overlay.on('pointerdown', () => {
+        //     overlay.destroy();
+        //     failedPanel.destroy();
+        // });
+
+        // Auto-hide after 2 seconds
+        this.time.delayedCall(2000, () => {
+            // overlay.destroy();
+            this.cardScene.hideFailedPanel();
+        });
+    }
+
+    /**
      * Execute a sequence of cards (from Go button)
      */
     private async executeCardSequence(cards: Array<{ type: CardType; speed: CardSpeed }>): Promise<void> {
@@ -192,6 +212,7 @@ export class Level1 extends Level
 
             if (!success) {
                 console.log(`Card ${i + 1} failed, stopping sequence`);
+                this.showFailedPanel();
                 break;
             }
 

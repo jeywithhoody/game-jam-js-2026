@@ -80,6 +80,7 @@ export class MovementCardsScene {
     private tempCardOrder: Array<{ type: CardType; speed: CardSpeed }> | null = null;
     private cardPositions: Array<{ x: number; y: number; index: number }> = [];
     private onCardReturnedToDeck: (() => void) | null = null;
+    private failedPanel: GameObjects.Image | null = null;
   
     constructor(scene: Scene) {
         this.scene = scene;
@@ -92,6 +93,13 @@ export class MovementCardsScene {
         const bg = this.scene.add.rectangle(0, 0, 1255, 360, 0x222222, 0.5);
         bg.setOrigin(0, 0);
         this.movementCardsContainer.add(bg);
+
+        this.failedPanel = this.scene.add.sprite(520, -160, 'failed-panel');
+        this.failedPanel.setCrop(439, 694, 1259, 367);
+        this.failedPanel.setDepth(10000); // Very high depth to ensure visibility
+        this.failedPanel.setVisible(false);
+        console.log('Failed panel created with crop (439, 694, 1259, 367)');
+        this.movementCardsContainer.add(this.failedPanel);
 
         // Create Go button
         this.createGoButton();
@@ -213,6 +221,14 @@ export class MovementCardsScene {
         });
 
         this.movementCardsContainer.add(this.goButton);
+    }
+
+    public showFailedPanel() {
+        this.failedPanel?.setVisible(true);
+    }
+
+    public hideFailedPanel() {
+        this.failedPanel?.setVisible(false);
     }
 
     addMovementCard(imageKey: string) {
