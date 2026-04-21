@@ -14,7 +14,7 @@ export class Level extends Scene
     protected timer : Timer = null;
     protected cardScene: MovementCardsScene;
     private timerText : Text = null;
-    private deckScene : Scene = null;
+    private deckScene: DeckScene;
 
     protected levelGrid: LevelGrid = null;
     protected robotSprite: Sprite = null;
@@ -101,6 +101,10 @@ export class Level extends Scene
 
         // Initialize movement cards scene
         this.cardScene = new MovementCardsScene(this);
+
+         this.cardScene.setOnCardReturnedToDeck(() => {
+            this.deckScene.addCards(1);
+        });
     }
 
     /**
