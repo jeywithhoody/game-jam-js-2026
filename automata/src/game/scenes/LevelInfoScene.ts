@@ -2,9 +2,9 @@ import { Scene, GameObjects, Input } from 'phaser';
 import { LevelMetadata } from '../util/LevelMetadata';
 
 const padding = 10;
-const panelPosition = { x: 51, y: 123 };
-const panelSize = { width: 317, height: 434 };
-const textZone = 75;
+const panelPosition = { x: 40, y: 20 };
+const panelSize = { width: 317, height: 544 };
+const textZone = 90;
 
 // Position: 51, 123
 // Size: 317, 434
@@ -54,9 +54,9 @@ export class LevelInfoScene extends Scene {
         const metadata = this.levelMetadata;
         let yOffset = 0;
         const lineHeight = 18;
-        const textConfig = { fontSize: '12px', color: '#00ff00', fontFamily: 'Arial' };
-        const titleConfig = { fontSize: '14px', color: '#00ff00', fontFamily: 'Arial', fontStyle: 'bold' };
-        const sectionConfig = { fontSize: '11px', color: '#00aa00', fontFamily: 'Arial', fontStyle: 'bold' };
+        const textConfig = { fontSize: '14px', color: '#000000', fontFamily: 'Arial' };
+        const titleConfig = { fontSize: '20px', color: '#000000', fontFamily: 'Arial', fontStyle: 'bold' };
+        const sectionConfig = { fontSize: '14px', color: '#000000', fontFamily: 'Arial', fontStyle: 'bold' };
 
         // Level title
         const titleText = this.add.text(0, yOffset, `Level ${metadata.levelNumber}`, titleConfig);
