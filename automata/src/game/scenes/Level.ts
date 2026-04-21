@@ -52,6 +52,10 @@ export class Level extends Scene
         this.load.image('robot-profil0003', 'robot-profil0003.png');
         this.load.image('robot-profil0006', 'robot-profil0006.png');
         this.load.image('robot-profil0009', 'robot-profil0009.png');
+        this.load.image('robot-profile-left0000', 'robot-profile-left0000.png');
+        this.load.image('robot-profile-left0003', 'robot-profile-left0003.png');
+        this.load.image('robot-profile-left0006', 'robot-profile-left0006.png');
+        this.load.image('robot-profile-left0009', 'robot-profile-left0009.png');
         this.load.image('robot-back0000', 'robot-back0000.png');
         this.load.image('robot-back0003', 'robot-back0003.png');
         this.load.image('robot-back0006', 'robot-back0006.png');
@@ -153,15 +157,14 @@ export class Level extends Scene
         const robotPos = this.levelGrid.getRobotPosition();
         const worldPos = this.levelGrid.getWorldPosition(robotPos.x, robotPos.y);
         
-        // Create robot sprite at its grid position
+        // Create robot sprite at its grid position (absolute position with offset)
         this.robotSprite = this.add.sprite(
             this.levelZoneX + worldPos.x,
             this.levelZoneY + worldPos.y,
             'robot-profil0000'
         );
-        this.robotSprite.setOrigin(0.5, 0.3);
-        // this.robotSprite.setDisplaySize(149, 205);
-        this.robotSprite.setCrop(854, 217, 149, 205);
+        this.robotSprite.setOrigin(0.45, 0.25);
+        this.robotSprite.setCrop(40, 40, 149, 205);
         this.robotSprite.setScale(0.6, 0.6);
         this.robotSprite.setDepth(100);
     }
@@ -272,7 +275,7 @@ export class Level extends Scene
             targets: this.robotSprite,
             x: targetX,
             y: targetY,
-            duration: 400,
+            duration: 500,
             ease: 'Linear',
             onComplete: () => {
                 this.isRobotMoving = false;
@@ -295,21 +298,25 @@ export class Level extends Scene
                 this.robotSprite.setTexture('robot-back0000');
                 this.robotSprite.setFlipX(false);
                 this.robotSprite.setCrop(27, 10, 173, 224);
+                this.robotSprite.setOrigin(0.45, 0.25);
                 break;
             case 'down':
                 this.robotSprite.setTexture('robot-front0000');
                 this.robotSprite.setFlipX(false);
                 this.robotSprite.setCrop(16, 19, 193, 213);
+                this.robotSprite.setOrigin(0.45, 0.25);
                 break;
             case 'left':
-                this.robotSprite.setTexture('robot-profil0000');
-                this.robotSprite.setFlipX(true);
-                this.robotSprite.setCrop(854, 217, 149, 205);
+                this.robotSprite.setTexture('robot-profile-left0000');
+                this.robotSprite.setFlipX(false);
+                this.robotSprite.setCrop(40, 40, 149, 205);
+                this.robotSprite.setOrigin(0.45, 0.25);
                 break;
             case 'right':
                 this.robotSprite.setTexture('robot-profil0000');
                 this.robotSprite.setFlipX(false);
-                this.robotSprite.setCrop(854, 217, 149, 205);
+                this.robotSprite.setCrop(40, 40, 149, 205);
+                this.robotSprite.setOrigin(0.45, 0.25);
                 break;
         }
     }

@@ -67,6 +67,7 @@ export class Level1 extends Level
         // Initialize level zone scene with grid visuals
         this.levelZoneScene = new LevelZoneScene(this);
         this.levelZoneScene.initializeGridVisuals(this.levelGrid);
+        this.levelZoneScene.getContainer().add(this.robotSprite);
         
         // Set up a sample hand of cards
         // this.movementCardsScene.setHand([
