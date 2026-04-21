@@ -163,8 +163,8 @@ export class MovementCardsScene {
     }
 
     private createGoButton(): void {
-        const goButtonX = 1100;
-        const goButtonY = 50;
+        const goButtonX = 1350;
+        const goButtonY = 25;
 
         this.goButton = this.scene.add.container(goButtonX, goButtonY);
         this.goButton.setDepth(150);
