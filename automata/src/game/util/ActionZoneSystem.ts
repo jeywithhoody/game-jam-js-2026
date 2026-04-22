@@ -45,9 +45,13 @@ export class ActionZoneSystem {
     /**
      * Check if robot can perform action at position
      */
-    public canPerformAction(gridX: number, gridY: number): { can: boolean; zoneId?: string; action?: 'take' | 'put'; item?: string } {
+    public canPerformAction(gridX: number, gridY: number, actionType?: 'take' | 'put'): { can: boolean; zoneId?: string; action?: 'take' | 'put'; item?: string } {
         for (const [id, zone] of this.zones.entries()) {
             if (zone.x === gridX && zone.y === gridY) {
+                // If actionType is specified, only match zones with that action type
+                if (actionType && zone.actionType !== actionType) {
+                    continue;
+                }
                 const state = this.zoneStates.get(id);
                 if (zone.allowMultiple || !state?.completed) {
                     return { can: true, zoneId: id, action: zone.actionType, item: zone.itemType };

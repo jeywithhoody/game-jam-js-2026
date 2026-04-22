@@ -71,6 +71,10 @@ export class Level extends Scene
         this.load.image('card-move-right-2', 'card-move-right-2.png');
         this.load.image('card-move-up-1', 'card-move-up-1.png');
         this.load.image('card-move-up-2', 'card-move-up-2.png');
+        this.load.image('card-take-1', 'card-take-1.png');
+        this.load.image('card-take-2', 'card-take-2.png');
+        this.load.image('card-drop-1', 'card-drop-1.png');
+        this.load.image('card-drop-2', 'card-drop-2.png');
         this.load.image('failed-panel', 'failed-panel.png');
     }
 
@@ -102,31 +106,39 @@ export class Level extends Scene
         this.deckScene = new DeckScene(this);
 
         // Set up callback for when deck card is clicked
-        this.deckScene.setOnCardClick(() => this.drawNewCards());
+        this.deckScene.setOnCardClick((card) => this.drawNewCards(card));
 
         // Initialize movement cards scene
         this.cardScene = new MovementCardsScene(this);
 
-         this.cardScene.setOnCardReturnedToDeck(() => {
-            this.deckScene.addCards(1);
+        this.cardScene.setOnCardReturnedToDeck((card) => {
+            this.deckScene.addCard(card);
         });
     }
 
     /**
-     * Draw new random movement cards when deck is clicked
+     * Draw a card into the hand. If card data is provided (deck-mode), use it directly.
+     * Otherwise fall back to a random card (for levels without a configured deck).
      */
-    private drawNewCards() {
-        const cardTypes = Object.values(CardType);
-        const cardSpeeds: CardSpeed[] = [CardSpeed.One, CardSpeed.Two];
-
-        // Generate random cards (let's say 3-5 cards)
-
-        for (let i = 0; i < 1; i++) {
+    protected drawNewCards(card: { type: CardType; speed: CardSpeed } | null) {
+        if (card) {
+            this.cardScene.addCardToHand(card.type, card.speed);
+        } else {
+            // Fallback: random card (for levels/scenes without a configured deck)
+            const cardTypes = Object.values(CardType);
+            const cardSpeeds: CardSpeed[] = [CardSpeed.One, CardSpeed.Two];
             const type = Utils.Array.GetRandom(cardTypes) as CardType;
             const speed = Utils.Array.GetRandom(cardSpeeds) as CardSpeed;
-            // Add the new card to the existing hand
             this.cardScene.addCardToHand(type, speed);
         }
+    }
+
+    /**
+     * Load a specific set of cards into the deck (shuffled by DeckScene).
+     * Call this in the level's create() to define the level-specific deck.
+     */
+    protected setupDeckCards(cards: Array<{ type: CardType; speed: CardSpeed }>): void {
+        this.deckScene.setCards(cards);
     }
 
     /**
@@ -201,17 +213,10 @@ export class Level extends Scene
         if(!isMovement) {
 
             const { x, y } = this.levelGrid.getRobotPosition();
-            const actionZone = this.levelGrid.getActionZoneAt(x, y);
+            const neededActionType = cardType === CardType.Take ? 'take' : 'put';
+            const actionZone = this.levelGrid.getActionZoneAt(x, y, neededActionType);
 
             if(actionZone === undefined) {
-                return false;
-            }
-
-            if(cardType === CardType.Take && actionZone.actionType !== 'take') {
-                return false;
-            }
-
-            if(cardType === CardType.Drop && actionZone.actionType !== 'put') {
                 return false;
             }
 

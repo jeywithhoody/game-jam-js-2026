@@ -9,6 +9,7 @@ export interface ActionZone {
     y: number;
     actionType: 'put' | 'take';
     itemType?: string;
+    label: string;
 }
 
 export class LevelGrid {
@@ -61,13 +62,14 @@ export class LevelGrid {
     /**
      * Add an action zone to the grid
      */
-    public addActionZone(gridX: number, gridY: number, actionType: 'put' | 'take', itemType?: string): void {
+    public addActionZone(gridX: number, gridY: number, actionType: 'put' | 'take', label: string, itemType?: string): void {
         if (this.isValidGridPosition(gridX, gridY)) {
             this.actionGrid.push({
                 x: gridX,
                 y: gridY,
                 actionType,
-                itemType
+                itemType,
+                label
             });
         }
     }
@@ -197,7 +199,9 @@ export class LevelGrid {
     /**
      * Check if there's an action zone at the given position
      */
-    public getActionZoneAt(gridX: number, gridY: number): ActionZone | undefined {
-        return this.actionGrid.find(zone => zone.x === gridX && zone.y === gridY);
+    public getActionZoneAt(gridX: number, gridY: number, actionType?: 'put' | 'take'): ActionZone | undefined {
+        return this.actionGrid.find(zone =>
+            zone.x === gridX && zone.y === gridY && (actionType === undefined || zone.actionType === actionType)
+        );
     }
 }

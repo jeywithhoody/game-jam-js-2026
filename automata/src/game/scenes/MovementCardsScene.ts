@@ -79,7 +79,7 @@ export class MovementCardsScene {
     private selectedCardIndex: number | null = null;
     private tempCardOrder: Array<{ type: CardType; speed: CardSpeed }> | null = null;
     private cardPositions: Array<{ x: number; y: number; index: number }> = [];
-    private onCardReturnedToDeck: (() => void) | null = null;
+    private onCardReturnedToDeck: ((card: { type: CardType; speed: CardSpeed }) => void) | null = null;
     private failedPanel: GameObjects.Image | null = null;
   
     constructor(scene: Scene) {
@@ -146,6 +146,8 @@ export class MovementCardsScene {
 
         this.scene.input.keyboard?.on('keydown-X', () => {
             if (this.selectedCardIndex !== null && this.tempCardOrder !== null) {
+                // Capture the card before removing it
+                const returnedCard = this.tempCardOrder[this.selectedCardIndex];
                 // Remove the card from the hand completely
                 this.tempCardOrder.splice(this.selectedCardIndex, 1);
                 
@@ -157,7 +159,7 @@ export class MovementCardsScene {
                 
                 // Notify that a card was returned to the deck
                 if (this.onCardReturnedToDeck) {
-                    this.onCardReturnedToDeck();
+                    this.onCardReturnedToDeck(returnedCard);
                 }
             }
         });
@@ -166,7 +168,7 @@ export class MovementCardsScene {
     /**
      * Set callback when a card is returned to the deck
      */
-    public setOnCardReturnedToDeck(callback: () => void) {
+    public setOnCardReturnedToDeck(callback: (card: { type: CardType; speed: CardSpeed }) => void) {
         this.onCardReturnedToDeck = callback;
     }
 

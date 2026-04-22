@@ -3,7 +3,7 @@ import { Scene, Button, SceneManager } from 'phaser';
 import SceneNames from './SceneName';
 import { Level1Grid } from '../grid/Level1Grid';
 import { LevelZoneScene } from './LevelZoneScene';
-import { MovementCardsScene, CardType, CardSpeed } from './MovementCardsScene';
+import { CardType, CardSpeed } from './MovementCardsScene';
 import { Level1Metadata, LevelMetadata } from '../util/LevelMetadata';
 import { LevelInfoScene } from './LevelInfoScene';
 
@@ -21,10 +21,57 @@ export class Level1 extends Level
     private levelMetadata: LevelMetadata = Level1Metadata;
     private completedActions: Set<string> = new Set();
     private isExecutingSequence: boolean = false;
+    private washerSprites: Map<string, Phaser.GameObjects.Sprite> = new Map();
+    private selectedWasherPosition: { x: number, y: number } | null = null;
 
     constructor()
     {
-        super(SceneNames.Level1)
+        super(SceneNames.Level1);
+    }
+
+    /**
+     * Cards that make up the Level 1 deck.
+     * DeckScene will shuffle these at level start.
+     * - 5 Take cards  (clothes-pile, sorting, washer-take, dryer-take, basket)
+     * - 3 Drop cards  (washer-put, dryer-put, folding-station)
+     * - Movement cards covering all directions at speeds 1 & 2
+     */
+    private buildLevel1Cards(): Array<{ type: CardType; speed: CardSpeed }> {
+        return [
+            // Take cards (5 needed for each pick-up action)
+            { type: CardType.Take, speed: CardSpeed.One },
+            { type: CardType.Take, speed: CardSpeed.One },
+            { type: CardType.Take, speed: CardSpeed.One },
+            { type: CardType.Take, speed: CardSpeed.One },
+            { type: CardType.Take, speed: CardSpeed.One },
+
+            // Drop cards (3 needed for each put-down action)
+            { type: CardType.Drop, speed: CardSpeed.One },
+            { type: CardType.Drop, speed: CardSpeed.One },
+            { type: CardType.Drop, speed: CardSpeed.One },
+
+            // Movement cards — Up
+            { type: CardType.MoveUp, speed: CardSpeed.One },
+            { type: CardType.MoveUp, speed: CardSpeed.One },
+            { type: CardType.MoveUp, speed: CardSpeed.Two },
+
+            // Movement cards — Down
+            { type: CardType.MoveDown, speed: CardSpeed.One },
+            { type: CardType.MoveDown, speed: CardSpeed.One },
+            { type: CardType.MoveDown, speed: CardSpeed.Two },
+
+            // Movement cards — Left
+            { type: CardType.MoveLeft, speed: CardSpeed.One },
+            { type: CardType.MoveLeft, speed: CardSpeed.One },
+            { type: CardType.MoveLeft, speed: CardSpeed.Two },
+            { type: CardType.MoveLeft, speed: CardSpeed.Two },
+
+            // Movement cards — Right
+            { type: CardType.MoveRight, speed: CardSpeed.One },
+            { type: CardType.MoveRight, speed: CardSpeed.One },
+            { type: CardType.MoveRight, speed: CardSpeed.Two },
+            { type: CardType.MoveRight, speed: CardSpeed.Two },
+        ];
     }
 
     /**
@@ -67,16 +114,13 @@ export class Level1 extends Level
         // Initialize level zone scene with grid visuals
         this.levelZoneScene = new LevelZoneScene(this);
         this.levelZoneScene.initializeGridVisuals(this.levelGrid);
-        this.levelZoneScene.getContainer().add(this.robotSprite);
-        
-        // Set up a sample hand of cards
-        // this.movementCardsScene.setHand([
-        //     { type: CardType.MoveRight, speed: CardSpeed.One },
-        //     { type: CardType.MoveUp, speed: CardSpeed.Two },
-        //     { type: CardType.MoveDown, speed: CardSpeed.One },
-        //     { type: CardType.MoveLeft, speed: CardSpeed.Two },
-        //     { type: CardType.MoveRight, speed: CardSpeed.Two }
-        // ]);
+        this.washerSprites.forEach(sprite => {
+            this.levelZoneScene.getContainer().add(sprite);  // Add washer to container
+        });
+        this.levelZoneScene.getContainer().add(this.robotSprite);  // Add robot above washer
+
+        // Hand the Level 1 card list to DeckScene — it will shuffle them
+        this.setupDeckCards(this.buildLevel1Cards());
 
         // Set up card play callback for individual card clicks
         this.cardScene.onCardPlay((cardType, cardSpeed, cardIndex) => {
@@ -153,6 +197,47 @@ export class Level1 extends Level
             itemType: 'Folded Clothes',
             name: 'Basket'
         });
+
+        // Create washer sprite at the center of the washer action zone (2, 0)
+        this.createWasherSprite(2, 0);
+        this.createWasherSprite(3, 1);
+    }
+
+    /**
+     * Create the washer machine sprite at its grid position
+     */
+    private createWasherSprite(x: number, y: number): void {
+        if (!this.levelGrid) return;
+        
+        // Get the world position for the washer at grid (2, 0)
+        const worldPos = this.levelGrid.getWorldPosition(x, y);
+        
+        // Create washer sprite at absolute position (will be converted to relative when added to container)
+        const washerSprite = this.add.sprite(
+            this.levelZoneX + worldPos.x,
+            this.levelZoneY + worldPos.y,
+            'washer-machine-run1'
+        );
+        this.washerSprites.set(`${x},${y}`, washerSprite);
+        console.log(this.washerSprites)
+        washerSprite.setScale(0.3);
+        washerSprite.setCrop(118, 49, 342, 314);
+        washerSprite.setOrigin(0.75, 0.55);
+        washerSprite.setDepth(90); // Below robot (100) but above grid visuals
+
+        // Create animation for the washer machine
+        this.anims.create({
+            key: `washer-running-${x}-${y}`, // Unique key for each washer
+            frames: [
+                { key: 'washer-machine-run1' },
+                { key: 'washer-machine-run2' },
+                { key: 'washer-machine-run3' },
+                { key: 'washer-machine-run5' },
+                { key: 'washer-machine-run6' }
+            ],
+            frameRate: 8,
+            repeat: 3  // Repeat 3 times when triggered
+        });
     }
 
     /**
@@ -170,6 +255,50 @@ export class Level1 extends Level
         } else {
             console.log('Move was invalid or robot is already moving');
         }
+    }
+
+    /**
+     * Override playCard to handle Take/Drop actions and trigger washer animation
+     */
+    public playCard(cardType: CardType, cardSpeed: CardSpeed): boolean {
+        // Call parent implementation
+        const success = super.playCard(cardType, cardSpeed);
+
+        // If it's a Drop action that succeeded, handle action zone effects
+        if (success && cardType === CardType.Drop) {
+            const robotPos = this.levelGrid.getRobotPosition();
+            const actionZone = this.actionZoneSystem.canPerformAction(robotPos.x, robotPos.y, 'put');
+
+            if (actionZone.can && actionZone.zoneId) {
+                debugger;
+                const result = this.actionZoneSystem.performAction(actionZone.zoneId);
+                if (result.success) {
+                    console.log(`✓ ${result.message}`);
+                    this.completedActions.add(actionZone.zoneId);
+
+                    // Trigger washer animation when robot puts clothes in the washer
+                    if (actionZone.zoneId === 'washer-put') {
+                        this.animateWasher();
+                    }
+                }
+            }
+        }
+
+        // Handle Take actions similarly
+        if (success && cardType === CardType.Take) {
+            const robotPos = this.levelGrid.getRobotPosition();
+            const actionZone = this.actionZoneSystem.canPerformAction(robotPos.x, robotPos.y, 'take');
+
+            if (actionZone.can && actionZone.zoneId) {
+                const result = this.actionZoneSystem.performAction(actionZone.zoneId);
+                if (result.success) {
+                    console.log(`✓ ${result.message}`);
+                    this.completedActions.add(actionZone.zoneId);
+                }
+            }
+        }
+
+        return success;
     }
 
     /**
@@ -244,7 +373,7 @@ export class Level1 extends Level
     protected onRobotMovementComplete(): void {
         const robotPos = this.levelGrid.getRobotPosition();
 
-        // Check for action zones at this position
+        // Check for action zones at this position (no filter - just checking if zone exists)
         const actionZone = this.actionZoneSystem.canPerformAction(robotPos.x, robotPos.y);
 
         if (actionZone.can && actionZone.zoneId) {
@@ -252,8 +381,39 @@ export class Level1 extends Level
             if (result.success) {
                 console.log(`✓ ${result.message}`);
                 this.completedActions.add(actionZone.zoneId);
+
+                // Trigger washer animation when robot puts clothes in the washer
+                if (actionZone.zoneId === 'washer-put' && actionZone.action === 'put') {
+                    this.selectedWasherPosition = { x: robotPos.x, y: robotPos.y };
+                    console.log('Triggering washer animation from movement completion');
+                    console.log(`Selected washer position: (${this.selectedWasherPosition.x}, ${this.selectedWasherPosition.y})`);
+                    console.log(`Washer sprites available: ${this.washerSprites}`);
+                    this.animateWasher();
+                }
             }
         }
+    }
+
+    /**
+     * Animate the washer machine sprite
+     */
+    private animateWasher(): void {
+        if (!this.selectedWasherPosition) return;
+        const washer = this.washerSprites.get(`${this.selectedWasherPosition.x},${this.selectedWasherPosition.y}`);
+        if (!washer) return;
+
+        // Play the washer running animation
+        washer.play(`washer-running-${this.selectedWasherPosition.x}-${this.selectedWasherPosition.y}`);
+
+        // Optional: Add a slight shake effect for more dynamism
+        this.tweens.add({
+            targets: washer,
+            x: washer.x + 2,
+            duration: 100,
+            yoyo: true,
+            repeat: 11,  // 12 total oscillations (3 seconds at 100ms each)
+            ease: 'Sine.easeInOut'
+        });
     }
 
     /**
