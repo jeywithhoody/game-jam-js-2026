@@ -1,4 +1,4 @@
-import { Scene, Utils, Button, SceneManager } from 'phaser';
+import { Scene, Utils, Button, SceneManager, BaseSoundManager } from 'phaser';
 import { Cards, MovementCardsScene, CardType, CardSpeed } from './MovementCardsScene.ts';
 import { DeckScene } from './DeckScene.ts';
 import { LevelZoneScene } from './LevelZoneScene.ts';
@@ -41,6 +41,8 @@ export class Game extends Scene
         // Load combined cards PNG
         this.load.image('cards-combined', 'cards.png');
 
+        this.load.audio('theme', 'suno_ai_moots_cardbot_drift.mp3')
+
         // Initialize movement cards scene
         this.cardScene = new MovementCardsScene(this);
     }
@@ -51,6 +53,7 @@ export class Game extends Scene
         const background = this.add.image(0, 0, 'background');
         background.setOrigin(0, 0);
         //background.setDisplaySize(1920, 1080);
+        this.playMusec();
         
         
         // Créer le sprite du robot face
@@ -229,6 +232,23 @@ export class Game extends Scene
             // Add the new card to the existing hand
             this.cardScene.addCardToHand(type, speed);
         }
+    }
+
+    playMusec(delay: number = 0) {
+        const music = this.sound.add('theme');
+
+        const loopMarker = {
+            name: 'loop',
+            start: delay,
+            duration: 1 * 60.00,
+            config: {
+                loop: true
+            }
+        };
+
+        music.addMarker(loopMarker);
+        music.play('loop', { delay: 0 });
+        music.setVolume(0.4);
     }
 
     update(time: number, delta: number)
