@@ -1,11 +1,17 @@
 import { Scene, GameObjects, Geom } from 'phaser';
+import { CardType, CardSpeed } from './MovementCardsScene';
+
+export type DrawnCard = { type: CardType; speed: CardSpeed };
 
 export class DeckScene {
     private scene: Scene;
     private deckContainer: GameObjects.Container;
-    private cardCount: number = 30; // Number of cards in the deck
+    /** Cards loaded from a level-specific deck (shuffled). When set, these are the source of truth. */
+    private cards: DrawnCard[] = [];
+    /** Fallback count used when no card data is provided (legacy / random-deck mode). */
+    private fallbackCount: number = 30;
     private cardBackImage: string = 'card-back';
-    private onCardClick: (() => void) | null = null;
+    private onCardDraw: ((card: DrawnCard | null) => void) | null = null;
 
     constructor(scene: Scene) {
         this.scene = scene;
@@ -13,10 +19,34 @@ export class DeckScene {
     }
 
     /**
-     * Set callback when a card is clicked
+     * Load a specific set of cards into the deck and shuffle them.
+     * Call this at level creation time to replace the default random deck.
      */
-    public setOnCardClick(callback: () => void) {
-        this.onCardClick = callback;
+    public setCards(cards: DrawnCard[]): void {
+        this.cards = [...cards];
+        this.fallbackCount = 0;
+        this.shuffle();
+        this.refreshDeckDisplay();
+    }
+
+    private shuffle(): void {
+        for (let i = this.cards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
+        }
+    }
+
+    private get totalCount(): number {
+        return this.cards.length + this.fallbackCount;
+    }
+
+    /**
+     * Set callback when a card is drawn from the deck.
+     * The card argument contains type/speed when the deck has card data,
+     * or null in fallback (random) mode.
+     */
+    public setOnCardClick(callback: (card: DrawnCard | null) => void) {
+        this.onCardDraw = callback;
     }
 
     private createDeck() {
@@ -44,7 +74,7 @@ export class DeckScene {
         const stackOffset = 4; // Offset between cards for depth
 
         // Display only the top few cards for visual effect
-        const visibleCards = Math.min(5, this.cardCount);
+        const visibleCards = Math.min(5, this.totalCount);
 
         for (let i = 0; i < visibleCards; i++) {
             const offsetX = i * stackOffset -315;
@@ -70,7 +100,7 @@ export class DeckScene {
         }
 
         // Add text showing card count
-        const countText = this.scene.add.text(75, -15, `${this.cardCount}`, {
+        const countText = this.scene.add.text(75, -15, `${this.totalCount}`, {
             fontSize: '16px',
             color: '#ffffff',
             align: 'center'
@@ -80,39 +110,54 @@ export class DeckScene {
     }
 
     /**
-     * Draw a card from the deck
+     * Draw a card from the deck.
+     * Returns the card data if the deck has card-mode data, null in fallback mode.
+     * Returns undefined if the deck is empty.
      */
-    public drawCard() {
-        if (this.cardCount > 0) {
-            this.cardCount--;
+    public drawCard(): DrawnCard | null | undefined {
+        if (this.cards.length > 0) {
+            const card = this.cards.pop()!;
             this.refreshDeckDisplay();
-            return true;
+            return card;
+        } else if (this.fallbackCount > 0) {
+            this.fallbackCount--;
+            this.refreshDeckDisplay();
+            return null; // null = drawn successfully but no card data
         }
-        return false;
+        return undefined; // deck empty
     }
 
     /**
      * Handle card click event
      */
     private handleCardClick() {
-        if (this.drawCard() && this.onCardClick) {
-            this.onCardClick();
+        const result = this.drawCard();
+        if (result !== undefined && this.onCardDraw) {
+            this.onCardDraw(result);
         }
     }
 
     /**
-     * Add cards back to the deck
+     * Add a specific card back to the bottom of the deck (card-mode).
      */
-    public addCards(count: number) {
-        this.cardCount += count;
+    public addCard(card: DrawnCard): void {
+        this.cards.unshift(card);
         this.refreshDeckDisplay();
     }
 
     /**
-     * Set the card count
+     * Add cards back to the deck by count (fallback/legacy mode).
+     */
+    public addCards(count: number) {
+        this.fallbackCount += count;
+        this.refreshDeckDisplay();
+    }
+
+    /**
+     * Set the card count (fallback mode only).
      */
     public setCardCount(count: number) {
-        this.cardCount = Math.max(0, count);
+        this.fallbackCount = Math.max(0, count);
         this.refreshDeckDisplay();
     }
 
@@ -120,7 +165,7 @@ export class DeckScene {
      * Get current card count
      */
     public getCardCount(): number {
-        return this.cardCount;
+        return this.totalCount;
     }
 
     /**

@@ -14,7 +14,7 @@ export class Level extends Scene
     protected timer : Timer = null;
     protected cardScene: MovementCardsScene;
     private timerText : Text = null;
-    private deckScene : Scene = null;
+    private deckScene: DeckScene;
 
     protected levelGrid: LevelGrid = null;
     protected robotSprite: Sprite = null;
@@ -52,6 +52,10 @@ export class Level extends Scene
         this.load.image('robot-profil0003', 'robot-profil0003.png');
         this.load.image('robot-profil0006', 'robot-profil0006.png');
         this.load.image('robot-profil0009', 'robot-profil0009.png');
+        this.load.image('robot-profile-left0000', 'robot-profile-left0000.png');
+        this.load.image('robot-profile-left0003', 'robot-profile-left0003.png');
+        this.load.image('robot-profile-left0006', 'robot-profile-left0006.png');
+        this.load.image('robot-profile-left0009', 'robot-profile-left0009.png');
         this.load.image('robot-back0000', 'robot-back0000.png');
         this.load.image('robot-back0003', 'robot-back0003.png');
         this.load.image('robot-back0006', 'robot-back0006.png');
@@ -67,6 +71,11 @@ export class Level extends Scene
         this.load.image('card-move-right-2', 'card-move-right-2.png');
         this.load.image('card-move-up-1', 'card-move-up-1.png');
         this.load.image('card-move-up-2', 'card-move-up-2.png');
+        this.load.image('card-take-1', 'card-take-1.png');
+        this.load.image('card-take-2', 'card-take-2.png');
+        this.load.image('card-drop-1', 'card-drop-1.png');
+        this.load.image('card-drop-2', 'card-drop-2.png');
+        this.load.image('failed-panel', 'failed-panel.png');
     }
 
     create()
@@ -97,27 +106,39 @@ export class Level extends Scene
         this.deckScene = new DeckScene(this);
 
         // Set up callback for when deck card is clicked
-        this.deckScene.setOnCardClick(() => this.drawNewCards());
+        this.deckScene.setOnCardClick((card) => this.drawNewCards(card));
 
         // Initialize movement cards scene
         this.cardScene = new MovementCardsScene(this);
+
+        this.cardScene.setOnCardReturnedToDeck((card) => {
+            this.deckScene.addCard(card);
+        });
     }
 
     /**
-     * Draw new random movement cards when deck is clicked
+     * Draw a card into the hand. If card data is provided (deck-mode), use it directly.
+     * Otherwise fall back to a random card (for levels without a configured deck).
      */
-    private drawNewCards() {
-        const cardTypes = Object.values(CardType);
-        const cardSpeeds: CardSpeed[] = [CardSpeed.One, CardSpeed.Two];
-
-        // Generate random cards (let's say 3-5 cards)
-
-        for (let i = 0; i < 1; i++) {
+    protected drawNewCards(card: { type: CardType; speed: CardSpeed } | null) {
+        if (card) {
+            this.cardScene.addCardToHand(card.type, card.speed);
+        } else {
+            // Fallback: random card (for levels/scenes without a configured deck)
+            const cardTypes = Object.values(CardType);
+            const cardSpeeds: CardSpeed[] = [CardSpeed.One, CardSpeed.Two];
             const type = Utils.Array.GetRandom(cardTypes) as CardType;
             const speed = Utils.Array.GetRandom(cardSpeeds) as CardSpeed;
-            // Add the new card to the existing hand
             this.cardScene.addCardToHand(type, speed);
         }
+    }
+
+    /**
+     * Load a specific set of cards into the deck (shuffled by DeckScene).
+     * Call this in the level's create() to define the level-specific deck.
+     */
+    protected setupDeckCards(cards: Array<{ type: CardType; speed: CardSpeed }>): void {
+        this.deckScene.setCards(cards);
     }
 
     /**
@@ -149,15 +170,14 @@ export class Level extends Scene
         const robotPos = this.levelGrid.getRobotPosition();
         const worldPos = this.levelGrid.getWorldPosition(robotPos.x, robotPos.y);
         
-        // Create robot sprite at its grid position
+        // Create robot sprite at its grid position (absolute position with offset)
         this.robotSprite = this.add.sprite(
             this.levelZoneX + worldPos.x,
             this.levelZoneY + worldPos.y,
             'robot-profil0000'
         );
-        this.robotSprite.setOrigin(0.5, 0.3);
-        // this.robotSprite.setDisplaySize(149, 205);
-        this.robotSprite.setCrop(854, 217, 149, 205);
+        this.robotSprite.setOrigin(0.45, 0.25);
+        this.robotSprite.setCrop(40, 40, 149, 205);
         this.robotSprite.setScale(0.6, 0.6);
         this.robotSprite.setDepth(100);
     }
@@ -193,17 +213,10 @@ export class Level extends Scene
         if(!isMovement) {
 
             const { x, y } = this.levelGrid.getRobotPosition();
-            const actionZone = this.levelGrid.getActionZoneAt(x, y);
+            const neededActionType = cardType === CardType.Take ? 'take' : 'put';
+            const actionZone = this.levelGrid.getActionZoneAt(x, y, neededActionType);
 
             if(actionZone === undefined) {
-                return false;
-            }
-
-            if(cardType === CardType.Take && actionZone.actionType !== 'take') {
-                return false;
-            }
-
-            if(cardType === CardType.Drop && actionZone.actionType !== 'put') {
                 return false;
             }
 
@@ -268,7 +281,7 @@ export class Level extends Scene
             targets: this.robotSprite,
             x: targetX,
             y: targetY,
-            duration: 400,
+            duration: 500,
             ease: 'Linear',
             onComplete: () => {
                 this.isRobotMoving = false;
@@ -291,21 +304,25 @@ export class Level extends Scene
                 this.robotSprite.setTexture('robot-back0000');
                 this.robotSprite.setFlipX(false);
                 this.robotSprite.setCrop(27, 10, 173, 224);
+                this.robotSprite.setOrigin(0.45, 0.25);
                 break;
             case 'down':
                 this.robotSprite.setTexture('robot-front0000');
                 this.robotSprite.setFlipX(false);
                 this.robotSprite.setCrop(16, 19, 193, 213);
+                this.robotSprite.setOrigin(0.45, 0.25);
                 break;
             case 'left':
-                this.robotSprite.setTexture('robot-profil0000');
-                this.robotSprite.setFlipX(true);
-                this.robotSprite.setCrop(854, 217, 149, 205);
+                this.robotSprite.setTexture('robot-profile-left0000');
+                this.robotSprite.setFlipX(false);
+                this.robotSprite.setCrop(40, 40, 149, 205);
+                this.robotSprite.setOrigin(0.45, 0.25);
                 break;
             case 'right':
                 this.robotSprite.setTexture('robot-profil0000');
                 this.robotSprite.setFlipX(false);
-                this.robotSprite.setCrop(854, 217, 149, 205);
+                this.robotSprite.setCrop(40, 40, 149, 205);
+                this.robotSprite.setOrigin(0.45, 0.25);
                 break;
         }
     }

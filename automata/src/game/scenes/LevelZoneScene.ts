@@ -117,7 +117,7 @@ export class LevelZoneScene {
             const actionLabel = this.scene.add.text(
                 zoneX + dims.cellWidth / 2,
                 zoneY + dims.cellHeight / 2,
-                zone.actionType.toUpperCase()[0],
+                `${zone.label}\n(${zone.actionType.toUpperCase()[0]})`,
                 {
                     fontSize: '14px',
                     fontStyle: 'bold',
