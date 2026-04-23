@@ -1,5 +1,4 @@
 import { Level } from './Level';
-import { Scene, Button, SceneManager } from 'phaser';
 import SceneNames from './SceneName';
 import { Level1Grid } from '../grid/Level1Grid';
 import { LevelZoneScene } from './LevelZoneScene';

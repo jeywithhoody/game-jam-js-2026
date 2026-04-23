@@ -1,4 +1,4 @@
-import { Scene, Text } from 'phaser';
+import { Scene } from 'phaser';
 import SceneNames from './SceneName';
 
 interface LevelOption {

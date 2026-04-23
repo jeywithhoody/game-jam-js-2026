@@ -1,5 +1,4 @@
-import { Scene, Utils, Button, SceneManager, Text, Sprite, Tweens } from 'phaser';
-import { Timer } from '../util/Timer';
+import { Scene, Utils, Sprite } from 'phaser';
 import { LevelGrid } from '../grid/LevelGrid';
 import { DeckScene } from './DeckScene';
 import { CardType, CardSpeed, MovementCardsScene } from './MovementCardsScene';
@@ -13,11 +12,9 @@ import SceneNames from './SceneName';
 //TODO : not drop when not the right Take
 export class Level extends Scene
 {
-    protected timer : Timer = null;
     protected cardScene: MovementCardsScene;
     protected levelZoneScene: LevelZoneScene | null = null;
     protected levelInfoScene: LevelInfoScene | null = null;
-    private timerText : Text = null;
     private deckScene: DeckScene;
 
     protected levelGrid: LevelGrid = null;
@@ -32,7 +29,6 @@ export class Level extends Scene
     constructor(levelName: string)
     {
         super(levelName);
-        this.timer = new Timer(400);
         this.actionZoneSystem = new ActionZoneSystem();
     }
 
@@ -87,19 +83,6 @@ export class Level extends Scene
         this.add.image(0, 0, 'background')
         .setOrigin(0)
         .setDisplaySize(this.scale.width, this.scale.height);
-        
-        // Position timer text better (top center)
-        this.timerText = this.add.text(this.scale.width / 2, 30, 'Timer: 400s', {
-            fontSize: '24px',
-            color: '#ffffff',
-            fontFamily: 'Arial',
-            fontStyle: 'bold'
-        });
-        this.timerText.setOrigin(0.5, 0);
-        this.timerText.setDepth(50);
-        
-        this.timer.reset();
-        this.draw();
 
         // Set up pause menu (Escape key)
         this.input.keyboard.on('keydown-ESC', () => {
@@ -117,7 +100,7 @@ export class Level extends Scene
 
         this.cardScene.setOnCardReturnedToDeck((card) => {
             this.deckScene.addCard(card);
-            this.levelInfoScene?.addPenaltySeconds(5);
+            this.levelInfoScene?.addPenaltySeconds(10);
         });
     }
 
@@ -187,17 +170,6 @@ export class Level extends Scene
         this.robotSprite.setCrop(40, 40, 149, 205);
         this.robotSprite.setScale(0.6, 0.6);
         this.robotSprite.setDepth(100);
-    }
-
-    update(time: number, delta: number)
-    {
-        this.timer.update();
-        this.draw();
-    }
-
-    draw()
-    {
-        this.timerText.setText('Timer: ' + Math.ceil(this.timer.getTime() / 1000) + 's');
     }
 
     /**

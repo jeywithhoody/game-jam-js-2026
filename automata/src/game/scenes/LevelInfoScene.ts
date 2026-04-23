@@ -31,6 +31,12 @@ export class LevelInfoScene extends Scene {
     }
 
     create() {
+        this.timerText = null;
+
+        this.events.once('shutdown', () => {
+            this.timerText = null;
+        });
+
         // Create background
         // const bg = this.add.rectangle(
         //     0, 0,
@@ -60,6 +66,7 @@ export class LevelInfoScene extends Scene {
         );
         this.timerText.setOrigin(0.5, 1);
         this.timerText.setDepth(20);
+        this.updateTimerDisplay();
 
         if (this.levelMetadata) {
             this.rebuildDisplay();
@@ -96,6 +103,34 @@ export class LevelInfoScene extends Scene {
     public addPenaltySeconds(seconds: number): void {
         this.elapsedMs += seconds * 1000;
         this.updateTimerDisplay();
+        this.showPenaltyAnimation(seconds);
+    }
+
+    private showPenaltyAnimation(seconds: number): void {
+        if (!this.timerText) return;
+        const label = this.add.text(
+            this.timerText.x,
+            this.timerText.y - this.timerText.height,
+            `+${seconds}s`,
+            {
+                fontSize: '28px',
+                color: '#ff4444',
+                fontFamily: 'Arial',
+                fontStyle: 'bold',
+                stroke: '#000000',
+                strokeThickness: 3,
+            }
+        );
+        label.setOrigin(0.5, 1);
+        label.setDepth(30);
+        this.tweens.add({
+            targets: label,
+            y: label.y - 60,
+            alpha: 0,
+            duration: 1200,
+            ease: 'Cubic.Out',
+            onComplete: () => label.destroy(),
+        });
     }
 
     private updateTimerDisplay(): void {

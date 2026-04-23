@@ -291,6 +291,10 @@ export class PauseMenuScene extends Scene {
         this.scene.stop(SceneNames.PauseMenu);
         const levelScene = this.scene.manager.isActive(SceneNames.Level1) || this.scene.manager.isPaused(SceneNames.Level1) ? SceneNames.Level1 : SceneNames.Level2;
         this.scene.stop(levelScene);
+        const levelInfoScene = this.scene.get(SceneNames.LevelInfo) as any;
+        levelInfoScene?.stopTimer();
+        levelInfoScene?.setLevelMetadata(null);
+        this.scene.stop(SceneNames.LevelInfo);
         this.scene.start(SceneNames.LevelSelect);
     }
 }
