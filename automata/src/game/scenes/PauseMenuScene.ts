@@ -295,6 +295,6 @@ export class PauseMenuScene extends Scene {
         levelInfoScene?.stopTimer();
         levelInfoScene?.setLevelMetadata(null);
         this.scene.stop(SceneNames.LevelInfo);
-        this.scene.start(SceneNames.LevelSelect);
+        this.scene.start(SceneNames.Start);
     }
 }
