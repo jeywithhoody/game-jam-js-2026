@@ -4,6 +4,8 @@ import { LevelGrid } from '../grid/LevelGrid';
 import { DeckScene } from './DeckScene';
 import { CardType, CardSpeed, MovementCardsScene } from './MovementCardsScene';
 import { ActionZoneSystem } from '../util/ActionZoneSystem';
+import { LevelZoneScene } from './LevelZoneScene';
+import { LevelInfoScene } from './LevelInfoScene';
 import SceneNames from './SceneName';
 
 
@@ -13,6 +15,8 @@ export class Level extends Scene
 {
     protected timer : Timer = null;
     protected cardScene: MovementCardsScene;
+    protected levelZoneScene: LevelZoneScene | null = null;
+    protected levelInfoScene: LevelInfoScene | null = null;
     private timerText : Text = null;
     private deckScene: DeckScene;
 
@@ -113,6 +117,7 @@ export class Level extends Scene
 
         this.cardScene.setOnCardReturnedToDeck((card) => {
             this.deckScene.addCard(card);
+            this.levelInfoScene?.addPenaltySeconds(5);
         });
     }
 
@@ -145,6 +150,7 @@ export class Level extends Scene
      * Pause the game and show pause menu
      */
     protected pauseGame(): void {
+        this.levelInfoScene?.stopTimer();
         this.scene.pause();
         this.scene.launch(SceneNames.PauseMenu);
     }
@@ -155,6 +161,7 @@ export class Level extends Scene
     public resumeFromPause(): void {
         this.scene.resume();
         this.scene.stop(SceneNames.PauseMenu);
+        this.levelInfoScene?.resumeTimer();
     }
 
     /**

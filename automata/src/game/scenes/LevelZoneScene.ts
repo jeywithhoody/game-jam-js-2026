@@ -19,6 +19,9 @@ export class LevelZoneScene {
     private levelGrid: LevelGrid = null;
     private gridVisualsContainer: GameObjects.Container = null;
 
+    private static readonly PANEL_WIDTH = 1435;
+    private static readonly PANEL_HEIGHT = 580;
+
     constructor(scene: Scene) {
         this.scene = scene;
         this.createLevelZone();
@@ -33,9 +36,10 @@ export class LevelZoneScene {
         this.levelZoneContainer.add(this.gridVisualsContainer);
 
         // Debug: Add a visible background to verify container is positioned correctly
-        const bg = this.scene.add.rectangle(0, 0, 1435, 580, 0x222222, 0.5);
+        const bg = this.scene.add.rectangle(0, 0, LevelZoneScene.PANEL_WIDTH, LevelZoneScene.PANEL_HEIGHT, 0x222222, 0.5);
         bg.setOrigin(0, 0);
         this.levelZoneContainer.add(bg);
+
     }
 
     /**
@@ -180,4 +184,5 @@ export class LevelZoneScene {
         const zone: LevelZone = { x: zoneX, y: zoneY, hasWasher, hasRobot };
         this.zones.push(zone);
     }
+
 }

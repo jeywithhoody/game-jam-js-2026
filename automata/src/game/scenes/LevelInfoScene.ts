@@ -12,6 +12,10 @@ export class LevelInfoScene extends Scene {
     private levelMetadata: LevelMetadata;
     private infoContainer: GameObjects.Container;
 
+    private timerText: GameObjects.Text | null = null;
+    private elapsedMs: number = 0;
+    private timerRunning: boolean = false;
+
     constructor() {
         super('LevelInfo');
     }
@@ -40,9 +44,68 @@ export class LevelInfoScene extends Scene {
         this.infoContainer = this.add.container(panelPosition.x + padding, panelPosition.y + textZone + padding);
         this.infoContainer.setDepth(10);
 
+        // Timer — bottom center of the info panel
+        this.timerText = this.add.text(
+            panelPosition.x + panelSize.width / 2,
+            panelPosition.y + panelSize.height,
+            '00:00',
+            {
+                fontSize: '32px',
+                color: '#000000',
+                fontFamily: 'Arial',
+                fontStyle: 'bold',
+                stroke: '#ffffff',
+                strokeThickness: 3,
+            }
+        );
+        this.timerText.setOrigin(0.5, 1);
+        this.timerText.setDepth(20);
+
         if (this.levelMetadata) {
             this.rebuildDisplay();
         }
+    }
+
+    // ── Timer ──────────────────────────────────────────────────────────────
+
+    /** Start (or restart) the timer from zero. */
+    public startTimer(): void {
+        this.elapsedMs = 0;
+        this.timerRunning = true;
+        this.updateTimerDisplay();
+    }
+
+    /** Pause the timer. */
+    public stopTimer(): void {
+        this.timerRunning = false;
+    }
+
+    /** Resume the timer after a pause. */
+    public resumeTimer(): void {
+        this.timerRunning = true;
+    }
+
+    /** Advance the timer. Called automatically by Phaser's scene loop. */
+    update(time: number, delta: number): void {
+        if (!this.timerRunning) return;
+        this.elapsedMs += delta;
+        this.updateTimerDisplay();
+    }
+
+    /** Add a time penalty (e.g. when a card is drawn back to the deck). */
+    public addPenaltySeconds(seconds: number): void {
+        this.elapsedMs += seconds * 1000;
+        this.updateTimerDisplay();
+    }
+
+    private updateTimerDisplay(): void {
+        if (!this.timerText) return;
+        const totalSeconds = Math.floor(this.elapsedMs / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        const mm = String(minutes).padStart(2, '0');
+        const ss = String(seconds).padStart(2, '0');
+        this.timerText.setText(`${mm}:${ss}`);
     }
 
     private rebuildDisplay(): void {

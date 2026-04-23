@@ -282,7 +282,9 @@ export class PauseMenuScene extends Scene {
     }
 
     private resumeGame(): void {
-        this.scene.stop();
+        const levelSceneName = this.scene.manager.isPaused(SceneNames.Level1) ? SceneNames.Level1 : SceneNames.Level2;
+        const levelScene = this.scene.get(levelSceneName) as any;
+        levelScene?.resumeFromPause();
     }
 
     private quitLevel(): void {
