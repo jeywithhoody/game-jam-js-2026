@@ -105,6 +105,7 @@ export class LoadingScene extends Scene {
         this.load.image('card-drop-1',       'card-drop-1.png');
         this.load.image('card-drop-2',       'card-drop-2.png');
         this.load.image('failed-panel',      'failed-panel.png');
+        this.load.image('cards-combined', 'cards.png');
 
         // Washer machine
         this.load.image('washer-machine-run1', 'washer-machine-run1.png');
@@ -113,12 +114,67 @@ export class LoadingScene extends Scene {
         this.load.image('washer-machine-run5', 'washer-machine-run5.png');
         this.load.image('washer-machine-run6', 'washer-machine-run6.png');
 
+        // Cloth-sorting animation
+        this.load.image('cloth-sorting0000',  'cloth-sorting0000.png');
+        this.load.image('cloth-sorting0003',  'cloth-sorting0003.png');
+        this.load.image('cloth-sorting0006',  'cloth-sorting0006.png');
+        this.load.image('cloth-sorting0007',  'cloth-sorting0007.png');
+        this.load.image('cloth-sorting0009',  'cloth-sorting0009.png');
+        this.load.image('cloth-sorting0011',  'cloth-sorting0011.png');
+        this.load.image('cloth-sorting0014',  'cloth-sorting0014.png');
+        this.load.image('cloth-sorting0015',  'cloth-sorting0015.png');
+        this.load.image('cloth-sorting0018',  'cloth-sorting0018.png');
+        this.load.image('cloth-sorting0022',  'cloth-sorting0022.png');
+        this.load.image('cloth-sorting0026',  'cloth-sorting0026.png');
+        this.load.image('cloth-sorting0029',  'cloth-sorting0029.png');
+        this.load.image('cloth-sorting0030',  'cloth-sorting0030.png');
+        this.load.image('cloth-sorting0033',  'cloth-sorting0033.png');
+        this.load.image('cloth-sorting0037',  'cloth-sorting0037.png');
+        this.load.image('cloth-sorting0041',  'cloth-sorting0041.png');
+        this.load.image('cloth-sorting0044',  'cloth-sorting0044.png');
+        this.load.image('cloth-sorting0045',  'cloth-sorting0045.png');
+        this.load.image('cloth-sorting0048',  'cloth-sorting0048.png');
+        this.load.image('cloth-sorting0052',  'cloth-sorting0052.png');
+        this.load.image('cloth-sorting0059',  'cloth-sorting0059.png');
+
         // ── Progress callback ─────────────────────────────────────────────
         this.load.on('progress', (value: number) => this.onProgress(value));
         this.load.on('complete', () => this.onComplete());
     }
 
     create() {
+        // ── Cloth-sorting animation ───────────────────────────────────────
+        if (!this.anims.exists('cloth-sorting-station')) {
+            this.anims.create({
+                key: 'cloth-sorting-station',
+                frames: [
+                    { key: 'cloth-sorting0000' },
+                    { key: 'cloth-sorting0003' },
+                    { key: 'cloth-sorting0006' },
+                    { key: 'cloth-sorting0007' },
+                    { key: 'cloth-sorting0009' },
+                    { key: 'cloth-sorting0011' },
+                    { key: 'cloth-sorting0014' },
+                    { key: 'cloth-sorting0015' },
+                    { key: 'cloth-sorting0018' },
+                    { key: 'cloth-sorting0022' },
+                    { key: 'cloth-sorting0026' },
+                    { key: 'cloth-sorting0029' },
+                    { key: 'cloth-sorting0030' },
+                    { key: 'cloth-sorting0033' },
+                    { key: 'cloth-sorting0037' },
+                    { key: 'cloth-sorting0041' },
+                    { key: 'cloth-sorting0044' },
+                    { key: 'cloth-sorting0045' },
+                    { key: 'cloth-sorting0048' },
+                    { key: 'cloth-sorting0052' },
+                    { key: 'cloth-sorting0059' },
+                ],
+                frameRate: 10,
+                repeat: 4,
+            });
+        }
+
         // Start the robot walk animation now that textures are ready
         if (!this.anims.exists('loading-robot-walk')) {
             this.anims.create({

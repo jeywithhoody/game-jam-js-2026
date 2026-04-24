@@ -20,6 +20,7 @@ export class Level1 extends Level
     private isExecutingSequence: boolean = false;
     private washerSprites: Map<string, Phaser.GameObjects.Sprite> = new Map();
     private selectedWasherPosition: { x: number, y: number } | null = null;
+    private sortingStationSprite: Phaser.GameObjects.Sprite | null = null;
 
     constructor()
     {
@@ -80,14 +81,6 @@ export class Level1 extends Level
     {
         super.preload();
         this.load.setPath('assets');
-
-        //Washer
-        this.load.image('washer-machine-run1', 'washer-machine-run1.png');
-        this.load.image('washer-machine-run2', 'washer-machine-run2.png');
-        this.load.image('washer-machine-run3', 'washer-machine-run3.png');
-        this.load.image('washer-machine-run5', 'washer-machine-run5.png');
-        this.load.image('washer-machine-run6', 'washer-machine-run6.png');
-
     }
 
     create()
@@ -199,6 +192,7 @@ export class Level1 extends Level
         // Create washer sprite at the center of the washer action zone (2, 0)
         this.createWasherSprite(2, 0);
         this.createWasherSprite(3, 1);
+        this.createSortingStationSprite(1, 1);
     }
 
     /**
@@ -236,6 +230,26 @@ export class Level1 extends Level
             frameRate: 8,
             repeat: 3  // Repeat 3 times when triggered
         });
+    }
+
+    private createSortingStationSprite(x: number, y: number): void {
+        if (!this.levelGrid) return;
+        
+        // Get the world position for the sorting station at grid (1, 1)
+        const worldPos = this.levelGrid.getWorldPosition(x, y);
+        
+
+        const clothSorting = this.add.sprite(
+            this.levelZoneX + worldPos.x,
+            this.levelZoneY + worldPos.y,
+            'cloth-sorting0059');
+        clothSorting.setCrop(477, 114, 322, 324);
+        clothSorting.setDepth(50);
+        clothSorting.setScale(0.55);
+        clothSorting.setOrigin(0.33, 0.30);
+        clothSorting.setDepth(80); // Below robot but above washer
+
+        this.sortingStationSprite = clothSorting;
     }
 
     /**
@@ -388,6 +402,10 @@ export class Level1 extends Level
                     console.log(`Washer sprites available: ${this.washerSprites}`);
                     this.animateWasher();
                 }
+                if (actionZone.zoneId === 'sorting-station' && actionZone.action === 'take') {
+                    console.log('Triggering sorting station animation from movement completion');
+                    this.animateSortingStation();
+                }
             }
         }
     }
@@ -412,6 +430,12 @@ export class Level1 extends Level
             repeat: 11,  // 12 total oscillations (3 seconds at 100ms each)
             ease: 'Sine.easeInOut'
         });
+    }
+
+    private animateSortingStation(): void {
+        if (!this.sortingStationSprite) return;
+
+        this.sortingStationSprite.play('cloth-sorting-station');
     }
 
     /**
