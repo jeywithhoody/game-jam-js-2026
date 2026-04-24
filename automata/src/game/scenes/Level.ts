@@ -219,6 +219,7 @@ export class Level extends Scene
 
         // Animate robot
         this.animateRobotMovement(direction);
+        this.scene.get(SceneNames.SoundScene).playRobotSound();
 
         return true;
     }

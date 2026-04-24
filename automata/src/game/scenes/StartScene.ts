@@ -18,7 +18,6 @@ export class StartScene extends Scene {
         this.load.image('robot-profil0003', 'robot-profil0003.png');
         this.load.image('robot-profil0006', 'robot-profil0006.png');
         this.load.image('robot-profil0009', 'robot-profil0009.png');
-        this.load.audio('theme', 'suno_ai_moots_cardbot_drift.mp3');
     }
 
     create() {
@@ -73,29 +72,6 @@ export class StartScene extends Scene {
         // Level overlay (hidden by default)
         this.levelOverlay = this.buildLevelOverlay();
         this.levelOverlay.setVisible(false);
-
-        // Music
-        this.playMusec();
-    }
-
-    // Music
-
-    playMusec(delay: number = 0) {
-        const music = this.sound.add('theme');
-
-        const loopMarker = {
-            name: 'loop',
-            start: delay,
-            duration: 1 * 60.00,
-            config: {
-                loop: true
-            }
-        };
-
-        music.addMarker(loopMarker);
-        music.play('loop', { delay: 0 });
-        console.log('play music!');
-        //music.setVolume(0.4);
     }
 
     // ── Robot walk loop ────────────────────────────────────────────────────
