@@ -14,6 +14,10 @@ export class PauseMenuScene extends Scene {
     private showingSettings: boolean = false;
     private brightnessOverlay: GameObjects.Rectangle;
 
+    private masterVolumeSliderValue: number = 1;
+    private musicVolumeSliderValue: number = 1;
+    private sfxVolumeSliderValue: number = 1;
+
     constructor() {
         super(SceneNames.PauseMenu);
     }
@@ -179,9 +183,11 @@ export class PauseMenuScene extends Scene {
         // Master Volume Slider
         this.masterVolumeSlider = this.createSlider(
             centerX - 200, centerY - 50,
-            this.sound.volume,
+            this.masterVolumeSliderValue,
             (value) => {
-                this.sound.volume = value;
+                this.masterVolumeSliderValue = value;
+                const poweredValue = this.sliderToGain(value);
+                this.scene.get(SceneNames.SoundScene).setMasterVolume(poweredValue);
             }
         );
         this.settingsPanel.add(this.masterVolumeSlider);
@@ -194,36 +200,37 @@ export class PauseMenuScene extends Scene {
         });
         this.settingsPanel.add(sfxLabel);
 
-        // SFX Volume Slider (stored in registry)
-        const sfxVolume = this.registry.get('sfxVolume') || 1;
+        // SFX Volume Slider
         this.sfxVolumeSlider = this.createSlider(
             centerX - 200, centerY + 20,
-            sfxVolume,
+            this.sfxVolumeSliderValue,
             (value) => {
-                this.registry.set('sfxVolume', value);
+                this.sfxVolumeSliderValue = value;
+                const poweredValue = this.sliderToGain(value);
+                this.scene.get(SceneNames.SoundScene).setSfxVolume(poweredValue);
             }
         );
         this.settingsPanel.add(this.sfxVolumeSlider);
 
-        // Brightness Label
-        const brightnessLabel = this.add.text(centerX - 200, centerY + 60, 'Brightness:', {
+        // Music Volume Label
+        const musicLabel = this.add.text(centerX - 200, centerY + 60, 'Music Volume:', {
             fontSize: '16px',
             color: '#ffffff',
             fontFamily: 'Arial'
         });
-        this.settingsPanel.add(brightnessLabel);
+        this.settingsPanel.add(musicLabel);
 
-        // Brightness Slider (stored in registry)
-        const brightness = this.registry.get('brightness') || 1;
-        this.brightnessSlider = this.createSlider(
+        // Music Volume Slider
+        this.musicVolumeSlider = this.createSlider(
             centerX - 200, centerY + 90,
-            brightness,
+            this.musicVolumeSliderValue,
             (value) => {
-                this.registry.set('brightness', value);
-                this.applyBrightness(value);
+                this.musicVolumeSliderValue = value;
+                const poweredValue = this.sliderToGain(value);
+                this.scene.get(SceneNames.SoundScene).setMusicVolume(poweredValue);
             }
         );
-        this.settingsPanel.add(this.brightnessSlider);
+        this.settingsPanel.add(this.musicVolumeSlider);
 
         // Back Button
         const backButton = this.createButton(centerX, centerY + 160, 'BACK', () => {
@@ -374,5 +381,10 @@ export class PauseMenuScene extends Scene {
         levelInfoScene?.setLevelMetadata(null);
         this.scene.stop(SceneNames.LevelInfo);
         this.scene.start(SceneNames.Start);
+    }
+
+    private sliderToGain(slider: number): number {
+        if (slider <= 0) return 0;
+        return Math.pow(slider, 2);
     }
 }
