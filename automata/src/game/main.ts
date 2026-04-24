@@ -1,4 +1,6 @@
 import { Game as MainGame } from './scenes/Game';
+import { LoadingScene } from './scenes/LoadingScene';
+import { StartScene } from './scenes/StartScene';
 import { Level1 } from './scenes/Level1';
 import { LevelSelectScene } from './scenes/LevelSelectScene';
 import { LevelInfoScene } from './scenes/LevelInfoScene';
@@ -18,6 +20,8 @@ const config: Types.Core.GameConfig = {
         autoCenter: Scale.CENTER_BOTH
     },
     scene: [
+        LoadingScene,
+        StartScene,
         MainGame,
         LevelSelectScene,
         Level1,

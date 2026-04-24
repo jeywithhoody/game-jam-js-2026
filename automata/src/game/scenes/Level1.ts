@@ -1,5 +1,4 @@
 import { Level } from './Level';
-import { Scene, Button, SceneManager } from 'phaser';
 import SceneNames from './SceneName';
 import { Level1Grid } from '../grid/Level1Grid';
 import { LevelZoneScene } from './LevelZoneScene';
@@ -16,8 +15,6 @@ import { LevelInfoScene } from './LevelInfoScene';
 
 export class Level1 extends Level
 {
-    private levelZoneScene: LevelZoneScene;
-    private levelInfoScene: LevelInfoScene;
     private levelMetadata: LevelMetadata = Level1Metadata;
     private completedActions: Set<string> = new Set();
     private isExecutingSequence: boolean = false;
@@ -110,14 +107,15 @@ export class Level1 extends Level
         this.scene.launch(SceneNames.LevelInfo);
         this.levelInfoScene = this.scene.get(SceneNames.LevelInfo) as LevelInfoScene;
         this.levelInfoScene.setLevelMetadata(this.levelMetadata);
+        this.levelInfoScene.startTimer();
         
         // Initialize level zone scene with grid visuals
         this.levelZoneScene = new LevelZoneScene(this);
         this.levelZoneScene.initializeGridVisuals(this.levelGrid);
         this.washerSprites.forEach(sprite => {
-            this.levelZoneScene.getContainer().add(sprite);  // Add washer to container
+            this.levelZoneScene!.getContainer().add(sprite);  // Add washer to container
         });
-        this.levelZoneScene.getContainer().add(this.robotSprite);  // Add robot above washer
+        this.levelZoneScene!.getContainer().add(this.robotSprite);  // Add robot above washer
 
         // Hand the Level 1 card list to DeckScene — it will shuffle them
         this.setupDeckCards(this.buildLevel1Cards());

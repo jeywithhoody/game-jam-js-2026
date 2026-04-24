@@ -282,13 +282,19 @@ export class PauseMenuScene extends Scene {
     }
 
     private resumeGame(): void {
-        this.scene.stop();
+        const levelSceneName = this.scene.manager.isPaused(SceneNames.Level1) ? SceneNames.Level1 : SceneNames.Level2;
+        const levelScene = this.scene.get(levelSceneName) as any;
+        levelScene?.resumeFromPause();
     }
 
     private quitLevel(): void {
         this.scene.stop(SceneNames.PauseMenu);
         const levelScene = this.scene.manager.isActive(SceneNames.Level1) || this.scene.manager.isPaused(SceneNames.Level1) ? SceneNames.Level1 : SceneNames.Level2;
         this.scene.stop(levelScene);
-        this.scene.start(SceneNames.LevelSelect);
+        const levelInfoScene = this.scene.get(SceneNames.LevelInfo) as any;
+        levelInfoScene?.stopTimer();
+        levelInfoScene?.setLevelMetadata(null);
+        this.scene.stop(SceneNames.LevelInfo);
+        this.scene.start(SceneNames.Start);
     }
 }
