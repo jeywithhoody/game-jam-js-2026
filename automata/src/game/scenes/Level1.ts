@@ -13,6 +13,17 @@ import { LevelInfoScene } from './LevelInfoScene';
  * Placement initial Robo -> Déplacement -> Pile de vêtements -> Triage -> Déplacement -> Laveuse -> Déplacement -> Sécheuse -> Déplacement -> Panier à linge -> Déplacement -> Pliage -> Déplacement -> Mise en inventaire -> Déplacement -> Revenir position initial Robo
  * */
 
+const zoneIdToActionIndex: Record<string, number> = {
+    'clothes-pile': 0,
+    'sorting-station': 1,
+    'washer-put': 2,
+    'washer-take': 3,
+    'dryer-put': 4,
+    'dryer-take': 5,
+    'folding-station': 6,
+    'basket': 7,
+};
+
 export class Level1 extends Level
 {
     private levelMetadata: LevelMetadata = Level1Metadata;
@@ -51,22 +62,40 @@ export class Level1 extends Level
             // Movement cards — Up
             { type: CardType.MoveUp, speed: CardSpeed.One },
             { type: CardType.MoveUp, speed: CardSpeed.One },
+            { type: CardType.MoveUp, speed: CardSpeed.One },
+            { type: CardType.MoveUp, speed: CardSpeed.One },
+            { type: CardType.MoveUp, speed: CardSpeed.Two },
+            { type: CardType.MoveUp, speed: CardSpeed.Two },
+            { type: CardType.MoveUp, speed: CardSpeed.Two },
             { type: CardType.MoveUp, speed: CardSpeed.Two },
 
             // Movement cards — Down
             { type: CardType.MoveDown, speed: CardSpeed.One },
             { type: CardType.MoveDown, speed: CardSpeed.One },
+            { type: CardType.MoveDown, speed: CardSpeed.One },
+            { type: CardType.MoveDown, speed: CardSpeed.One },
+            { type: CardType.MoveDown, speed: CardSpeed.Two },
+            { type: CardType.MoveDown, speed: CardSpeed.Two },
+            { type: CardType.MoveDown, speed: CardSpeed.Two },
             { type: CardType.MoveDown, speed: CardSpeed.Two },
 
             // Movement cards — Left
             { type: CardType.MoveLeft, speed: CardSpeed.One },
             { type: CardType.MoveLeft, speed: CardSpeed.One },
+            { type: CardType.MoveLeft, speed: CardSpeed.One },
+            { type: CardType.MoveLeft, speed: CardSpeed.One },
+            { type: CardType.MoveLeft, speed: CardSpeed.Two },
+            { type: CardType.MoveLeft, speed: CardSpeed.Two },
             { type: CardType.MoveLeft, speed: CardSpeed.Two },
             { type: CardType.MoveLeft, speed: CardSpeed.Two },
 
             // Movement cards — Right
             { type: CardType.MoveRight, speed: CardSpeed.One },
             { type: CardType.MoveRight, speed: CardSpeed.One },
+            { type: CardType.MoveRight, speed: CardSpeed.One },
+            { type: CardType.MoveRight, speed: CardSpeed.One },
+            { type: CardType.MoveRight, speed: CardSpeed.Two },
+            { type: CardType.MoveRight, speed: CardSpeed.Two },
             { type: CardType.MoveRight, speed: CardSpeed.Two },
             { type: CardType.MoveRight, speed: CardSpeed.Two },
         ];
@@ -287,6 +316,8 @@ export class Level1 extends Level
                 if (result.success) {
                     console.log(`✓ ${result.message}`);
                     this.completedActions.add(actionZone.zoneId);
+                    const dropIdx = zoneIdToActionIndex[actionZone.zoneId];
+                    if (dropIdx !== undefined) this.levelInfoScene?.markActionComplete(dropIdx);
 
                     // Trigger washer animation when robot puts clothes in the washer
                     if (actionZone.zoneId === 'washer-put') {
@@ -306,6 +337,8 @@ export class Level1 extends Level
                 if (result.success) {
                     console.log(`✓ ${result.message}`);
                     this.completedActions.add(actionZone.zoneId);
+                    const takeIdx = zoneIdToActionIndex[actionZone.zoneId];
+                    if (takeIdx !== undefined) this.levelInfoScene?.markActionComplete(takeIdx);
                 }
             }
         }
@@ -390,9 +423,12 @@ export class Level1 extends Level
 
         if (actionZone.can && actionZone.zoneId) {
             const result = this.actionZoneSystem.performAction(actionZone.zoneId);
+            console.log(`Robot moved to (${robotPos.x}, ${robotPos.y}) - checking action zones`, actionZone, result);
             if (result.success) {
                 console.log(`✓ ${result.message}`);
                 this.completedActions.add(actionZone.zoneId);
+                const moveIdx = zoneIdToActionIndex[actionZone.zoneId];
+                if (moveIdx !== undefined) this.levelInfoScene?.markActionComplete(moveIdx);
 
                 // Trigger washer animation when robot puts clothes in the washer
                 if (actionZone.zoneId === 'washer-put' && actionZone.action === 'put') {
@@ -468,14 +504,21 @@ export class Level1 extends Level
      * Handle level win
      */
     private levelWon(): void {
-        const completionTime = Math.ceil((400 - this.timer.getTime()) / 1000);
-        console.log(`🎉 Level completed in ${completionTime} seconds!`);
+        this.levelInfoScene?.stopTimer();
+
+        const elapsedMs = this.levelInfoScene?.getElapsedMs() ?? 0;
+        const totalSeconds = Math.floor(elapsedMs / 1000);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        console.log(`🎉 Level completed in ${timeStr}!`);
 
         // Store high score
-        this.registry.set('level1_best_time', completionTime);
+        this.registry.set('level1_best_time', totalSeconds);
 
         // Show win screen
-        this.add.text(this.scale.width / 2, this.scale.height / 2, `LEVEL COMPLETE!\nTime: ${completionTime}s`, {
+        this.add.text(this.scale.width / 2, this.scale.height / 2, `LEVEL COMPLETE!\nTime: ${timeStr}`, {
             fontSize: '48px',
             color: '#00ff00',
             fontFamily: 'Arial',

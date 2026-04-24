@@ -1,7 +1,8 @@
 export interface ActionStep {
     location: string;
-    action: 'take' | 'put';
+    action: 'take' | 'put' | 'finish';
     item: string;
+    position: { x: number; y: number };
 }
 
 export interface LevelMetadata {
@@ -26,14 +27,15 @@ export const Level1Metadata: LevelMetadata = {
         "Return to starting position"
     ],
     actions: [
-        { location: "Clothes Pile", action: "take", item: "Dirty Clothes" },
-        { location: "Sorting Station", action: "take", item: "Sorted Clothes" },
-        { location: "Washing Machine", action: "put", item: "Clothes" },
-        { location: "Washing Machine", action: "take", item: "Washed Clothes" },
-        { location: "Dryer", action: "put", item: "Washed Clothes" },
-        { location: "Dryer", action: "take", item: "Dry Clothes" },
-        { location: "Folding Station", action: "put", item: "Dry Clothes" },
-        { location: "Basket", action: "take", item: "Folded Clothes" }
+        { location: "Clothes Pile", action: "take", item: "Dirty Clothes", position: { x: 1, y: 1 } },
+        { location: "Sorting Station", action: "take", item: "Sorted Clothes", position: { x: 2, y: 2 } },
+        { location: "Washing Machine", action: "put", item: "Clothes", position: { x: 3, y: 1 } },
+        { location: "Washing Machine", action: "take", item: "Washed Clothes", position: { x: 3, y: 1 } },
+        { location: "Dryer", action: "put", item: "Washed Clothes", position: { x: 4, y: 2 } },
+        { location: "Dryer", action: "take", item: "Dry Clothes", position: { x: 4, y: 2 } },
+        { location: "Folding Station", action: "put", item: "Dry Clothes", position: { x: 3, y: 3 } },
+        { location: "Basket", action: "take", item: "Folded Clothes", position: { x: 5, y: 1 } },
+        { location: "End Position", action: "finish", item: "Finished", position: { x: 1, y: 2 } }
     ],
     startPosition: { x: 0, y: 1 }
 };
