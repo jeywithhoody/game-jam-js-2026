@@ -248,7 +248,8 @@ export class Game extends Scene
 
         music.addMarker(loopMarker);
         music.play('loop', { delay: 0 });
-        music.setVolume(0.4);
+        console.log('play music!');
+        //music.setVolume(0.4);
     }
 
     update(time: number, delta: number)

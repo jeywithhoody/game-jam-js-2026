@@ -70,7 +70,6 @@ export class MovementCardsScene {
     private cardSprites: GameObjects.Sprite[] = [];
     private cardSpacing: number = 200;
     private cardPlayCallback: CardPlayCallback | null = null;
-    private cardPositions: Array<{ x: number; y: number; index: number }> = [];
     private sequenceCallback: CardSequenceCallback | null = null;
     private goButton: GameObjects.Container;
     private draggedCard: { index: number; originalX: number; sprite: GameObjects.Sprite; startX: number } | null = null;
