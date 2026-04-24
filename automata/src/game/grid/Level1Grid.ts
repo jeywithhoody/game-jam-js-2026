@@ -24,22 +24,25 @@ export class Level1Grid extends LevelGrid {
         this.setRobotPosition(0, 1);
 
         // Define action zones
+
+        this.addActionZone(0, 0, 'take', 'Dirty Clothes','dirty-clothes'); // Clothes pile at (0,0) - take action
+        this.addActionZone(1, 1, 'take', 'Sorted Clothes','sorted-clothes');
+
         // Washer machine at column 2, row 0 - put and take action
         this.addActionZone(2, 0, 'put', 'Dirty Clothes','dirty-clothes');
         this.addActionZone(2, 0, 'take', 'Washed Clothes','washed-clothes');
 
         // Sorting zone at column 1, row 1 - take action (take sorted clothes)
-        this.addActionZone(1, 1, 'take', 'Sorted Clothes','sorted-clothes');
 
         // Dryer at column 3, row 1 - put and take action
         this.addActionZone(3, 1, 'put', 'Wet Clothes','wet-clothes');
         this.addActionZone(3, 1, 'take', 'Dry Clothes','dry-clothes');
 
+        this.addActionZone(2, 2, 'put', 'Clothes to Fold','clothes-to-fold');
         // Basket at column 4, row 0 - take action (take clean clothes)
         this.addActionZone(4, 0, 'take', 'Clean Clothes','clean-clothes');
 
         // Folding zone at column 2, row 2 - put action (put clothes to fold)
-        this.addActionZone(2, 2, 'put', 'Clothes to Fold','clothes-to-fold');
 
         // All cells are walkable by default, but you can block specific cells if needed
         // For example, if there are obstacles in the level

@@ -11,6 +11,7 @@ const textZone = 90;
 export class LevelInfoScene extends Scene {
     private levelMetadata: LevelMetadata;
     private infoContainer: GameObjects.Container;
+    private actionTexts: GameObjects.Text[] = [];
 
     private timerText: GameObjects.Text | null = null;
     private elapsedMs: number = 0;
@@ -92,6 +93,11 @@ export class LevelInfoScene extends Scene {
         this.timerRunning = true;
     }
 
+    /** Returns the elapsed time in milliseconds. */
+    public getElapsedMs(): number {
+        return this.elapsedMs;
+    }
+
     /** Advance the timer. Called automatically by Phaser's scene loop. */
     update(time: number, delta: number): void {
         if (!this.timerRunning) return;
@@ -146,6 +152,7 @@ export class LevelInfoScene extends Scene {
     private rebuildDisplay(): void {
         // Clear old content
         this.infoContainer.removeAll(true);
+        this.actionTexts = [];
 
         if (!this.levelMetadata) return;
 
@@ -182,7 +189,7 @@ export class LevelInfoScene extends Scene {
 
         metadata.objectives.forEach((obj, idx) => {
             if (yOffset > this.scale.height - 150) return; // Stop if running out of space
-            const shortObj = obj.length > 28 ? obj.substring(0, 25) + '...' : obj;
+            const shortObj = obj.length > 50 ? obj.substring(0, 47) + '...' : obj;
             const objText = this.add.text(3, yOffset, `• ${shortObj}`, textConfig);
             this.infoContainer.add(objText);
             yOffset += lineHeight - 2;
@@ -196,12 +203,36 @@ export class LevelInfoScene extends Scene {
 
         metadata.actions.forEach((action, idx) => {
             if (yOffset > this.scale.height - 80) return; // Stop if running out of space
-            const actionText = `${idx + 1}. ${action.action.toUpperCase()}`;
-            const shortAction = actionText.length > 26 ? actionText.substring(0, 23) + '...' : actionText;
+            const actionText = `${idx + 1}. ${action.item.toUpperCase()} (${action.action.toUpperCase()} at ${action.position.x},${action.position.y})`;
+            const shortAction = actionText.length > 100 ? actionText.substring(0, 97) + '...' : actionText;
             const actText = this.add.text(3, yOffset, shortAction, textConfig);
             this.infoContainer.add(actText);
+            this.actionTexts.push(actText);
             yOffset += lineHeight - 3;
         });
+    }
+
+    /**
+     * Strike through the action item at the given index (0-based).
+     * Call this when the robot successfully completes that action.
+     */
+    public markActionComplete(index: number): void {
+        const text = this.actionTexts[index];
+        if (!text) return;
+
+        // Dim the text
+        text.setAlpha(0.4);
+
+        // Draw a strikethrough line centered vertically on the text
+        const line = this.add.rectangle(
+            text.x + text.width / 2,
+            text.y + text.height / 2,
+            text.width,
+            2,
+            0x000000
+        );
+        line.setDepth(15);
+        this.infoContainer.add(line);
     }
 
     /**

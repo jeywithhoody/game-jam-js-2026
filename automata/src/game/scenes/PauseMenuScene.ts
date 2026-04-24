@@ -4,6 +4,7 @@ import SceneNames from './SceneName';
 export class PauseMenuScene extends Scene {
     private pauseGraphics: GameObjects.Graphics;
     private resumeButton: GameObjects.Container;
+    private restartButton: GameObjects.Container;
     private quitButton: GameObjects.Container;
     private settingsButton: GameObjects.Container;
     private masterVolumeSlider: GameObjects.Container;
@@ -48,32 +49,99 @@ export class PauseMenuScene extends Scene {
     }
 
     private createMainMenu(): void {
-        const centerX = this.scale.width / 2;
-        const centerY = this.scale.height / 2;
+        const w = this.scale.width;
+        const h = this.scale.height;
+        const centerY = h / 2;
 
-        // Title
-        const title = this.add.text(centerX, centerY - 150, 'PAUSED', {
-            fontSize: '48px',
+        const panelW = w * 0.8;
+        const panelH = h * 0.75;
+        const panelX = w / 2;
+        const panelY = centerY;
+
+        // Outer panel background
+        const panelBg = this.add.rectangle(panelX, panelY, panelW, panelH, 0x111111, 0.95);
+        panelBg.setStrokeStyle(2, 0x00ff00);
+        panelBg.setDepth(201);
+
+        // Divider line between left and right halves
+        const divider = this.add.graphics();
+        divider.lineStyle(2, 0x00ff00, 0.5);
+        divider.beginPath();
+        divider.moveTo(panelX, panelY - panelH / 2 + 20);
+        divider.lineTo(panelX, panelY + panelH / 2 - 20);
+        divider.strokePath();
+        divider.setDepth(201);
+
+        // ── LEFT SIDE – buttons ──────────────────────────────────────────
+        const leftX = panelX - panelW / 4;
+
+        const title = this.add.text(leftX, centerY - 160, 'PAUSED', {
+            fontSize: '42px',
             color: '#ffffff',
             fontFamily: 'Arial',
             fontStyle: 'bold'
         });
         title.setOrigin(0.5);
-        title.setDepth(201);
+        title.setDepth(202);
 
-        // Resume Button
-        this.resumeButton = this.createButton(centerX, centerY - 30, 'RESUME (ESC)', () => {
+        this.resumeButton = this.createButton(leftX, centerY - 70, 'RESUME (ESC)', () => {
             this.resumeGame();
         });
 
-        // Settings Button
-        this.settingsButton = this.createButton(centerX, centerY + 30, 'SETTINGS', () => {
+        this.restartButton = this.createButton(leftX, centerY - 10, 'RESTART LEVEL', () => {
+            this.restartLevel();
+        });
+
+        this.settingsButton = this.createButton(leftX, centerY + 50, 'SETTINGS', () => {
             this.showSettings();
         });
 
-        // Quit Button
-        this.quitButton = this.createButton(centerX, centerY + 90, 'QUIT LEVEL', () => {
+        this.quitButton = this.createButton(leftX, centerY + 110, 'QUIT LEVEL', () => {
             this.quitLevel();
+        });
+
+        // ── RIGHT SIDE – controls reference ─────────────────────────────
+        const rightX = panelX + panelW / 4;
+
+        const controlsTitle = this.add.text(rightX, centerY - 160, 'CONTROLS', {
+            fontSize: '28px',
+            color: '#00ff00',
+            fontFamily: 'Arial',
+            fontStyle: 'bold'
+        });
+        controlsTitle.setOrigin(0.5);
+        controlsTitle.setDepth(202);
+
+        const controlsData: { icon: string; label: string }[] = [
+            { icon: '🖱️  Click',        label: 'Select a card' },
+            { icon: '← Left Arrow',     label: 'Move card right' },
+        ];
+
+        controlsData.forEach(({ icon, label }, i) => {
+            const rowY = centerY - 80 + i * 80;
+
+            // Icon / key badge
+            const badge = this.add.rectangle(rightX, rowY, 260, 40, 0x00ff00, 0.15);
+            badge.setStrokeStyle(1, 0x00ff00);
+            badge.setDepth(202);
+
+            const iconText = this.add.text(rightX, rowY, icon, {
+                fontSize: '16px',
+                color: '#00ff00',
+                fontFamily: 'Arial',
+                fontStyle: 'bold'
+            });
+            iconText.setOrigin(0.5);
+            iconText.setDepth(202);
+
+            // Description below badge
+            const descText = this.add.text(rightX, rowY + 30, label, {
+                fontSize: '14px',
+                color: '#aaaaaa',
+                fontFamily: 'Arial'
+            });
+            descText.setOrigin(0.5);
+            descText.setDepth(202);
         });
     }
 
@@ -262,6 +330,7 @@ export class PauseMenuScene extends Scene {
         this.showingSettings = true;
         this.settingsPanel.setVisible(true);
         this.resumeButton.setVisible(false);
+        this.restartButton.setVisible(false);
         this.quitButton.setVisible(false);
         this.settingsButton.setVisible(false);
     }
@@ -270,6 +339,7 @@ export class PauseMenuScene extends Scene {
         this.showingSettings = false;
         this.settingsPanel.setVisible(false);
         this.resumeButton.setVisible(true);
+        this.restartButton.setVisible(true);
         this.quitButton.setVisible(true);
         this.settingsButton.setVisible(true);
     }
@@ -285,6 +355,14 @@ export class PauseMenuScene extends Scene {
         const levelSceneName = this.scene.manager.isPaused(SceneNames.Level1) ? SceneNames.Level1 : SceneNames.Level2;
         const levelScene = this.scene.get(levelSceneName) as any;
         levelScene?.resumeFromPause();
+    }
+
+    private restartLevel(): void {
+        const levelSceneName = this.scene.manager.isPaused(SceneNames.Level1) ? SceneNames.Level1 : SceneNames.Level2;
+        this.scene.stop(SceneNames.PauseMenu);
+        this.scene.stop(SceneNames.LevelInfo);
+        this.scene.stop(levelSceneName);
+        this.scene.start(levelSceneName);
     }
 
     private quitLevel(): void {
