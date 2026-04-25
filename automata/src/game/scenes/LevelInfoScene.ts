@@ -1,4 +1,4 @@
-import { Scene, GameObjects, Input } from 'phaser';
+import { Scene, GameObjects } from 'phaser';
 import { LevelMetadata } from '../util/LevelMetadata';
 
 const padding = 10;
@@ -150,9 +150,9 @@ export class LevelInfoScene extends Scene {
         const metadata = this.levelMetadata;
         let yOffset = 0;
         const lineHeight = 18;
-        const textConfig = { fontSize: '14px', color: '#000000', fontFamily: 'Arial' };
-        const titleConfig = { fontSize: '20px', color: '#000000', fontFamily: 'Arial', fontStyle: 'bold' };
-        const sectionConfig = { fontSize: '14px', color: '#000000', fontFamily: 'Arial', fontStyle: 'bold' };
+        const textConfig = { fontSize: '16px', color: '#000000', fontFamily: 'Arial' };
+        const titleConfig = { fontSize: '24px', color: '#000000', fontFamily: 'Arial', fontStyle: 'bold' };
+        const sectionConfig = { fontSize: '16px', color: '#000000', fontFamily: 'Arial', fontStyle: 'bold' };
 
         // Level title
         const titleText = this.add.text(0, yOffset, `Level ${metadata.levelNumber}`, titleConfig);

@@ -311,7 +311,6 @@ export class Level1 extends Level
             const actionZone = this.actionZoneSystem.canPerformAction(robotPos.x, robotPos.y, 'put');
 
             if (actionZone.can && actionZone.zoneId) {
-                debugger;
                 const result = this.actionZoneSystem.performAction(actionZone.zoneId);
                 if (result.success) {
                     console.log(`✓ ${result.message}`);

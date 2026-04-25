@@ -20,23 +20,6 @@ export class LoadingScene extends Scene {
         const barX = (W - this.BAR_W) / 2;
         const barY = H * 0.72;
 
-        this.load.image('robot-profil0000', 'robot-profil0000.png');
-        this.load.image('robot-profil0003', 'robot-profil0003.png');
-        this.load.image('robot-profil0006', 'robot-profil0006.png');
-        this.load.image('robot-profil0009', 'robot-profil0009.png');
-
-        this.anims.create({
-            key: 'loading-robot-walk',
-            frames: [
-                { key: 'robot-profil0000' },
-                { key: 'robot-profil0003' },
-                { key: 'robot-profil0006' },
-                { key: 'robot-profil0009' },
-            ],
-            frameRate: 8,
-            repeat: -1,
-        });
-
         // ── Background ────────────────────────────────────────────────────
         const bg = this.add.rectangle(W / 2, H / 2, W, H, 0x0d0d1a);
         bg.setOrigin(0.5, 0.5);
@@ -121,10 +104,6 @@ export class LoadingScene extends Scene {
         this.load.image('card-move-right-2', 'card-move-right-2.png');
         this.load.image('card-move-up-1',    'card-move-up-1.png');
         this.load.image('card-move-up-2',    'card-move-up-2.png');
-        this.load.image('card-take-1',       'card-take-1.png');
-        this.load.image('card-take-2',       'card-take-2.png');
-        this.load.image('card-drop-1',       'card-drop-1.png');
-        this.load.image('card-drop-2',       'card-drop-2.png');
         this.load.image('failed-panel',      'failed-panel.png');
         this.load.image('cards-combined', 'cards.png');
 
