@@ -17,7 +17,7 @@ export class Level2Grid extends LevelGrid {
     constructor() {
         // Grid dimensions: 6 columns x 4 rows to fit in 1435x580
         // This gives us cells of ~239x145 pixels
-        super(6, 4, 1435, 580);
+        super(4, 6, 1435, 580);
         this.setupLevel2Grid();
     }
 
