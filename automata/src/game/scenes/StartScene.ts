@@ -4,6 +4,7 @@ import SceneNames from './SceneName';
 export class StartScene extends Scene {
     private robot: GameObjects.Sprite;
     private levelOverlay: GameObjects.Container;
+    private creditsOverlay: GameObjects.Container;
 
     constructor() {
         super(SceneNames.Start);
@@ -14,6 +15,7 @@ export class StartScene extends Scene {
         this.load.image('game-start', 'game-start.png');
         this.load.image('play-btn', 'play-btn.png');
         this.load.image('credits-btn', 'credits-btn.png');
+        this.load.image('credits-panel', 'credits-panel.png');
         this.load.image('robot-profil0000', 'robot-profil0000.png');
         this.load.image('robot-profil0003', 'robot-profil0003.png');
         this.load.image('robot-profil0006', 'robot-profil0006.png');
@@ -86,10 +88,15 @@ export class StartScene extends Scene {
             });
         creditsBtn.on('pointerover', () => creditsBtn.setAlpha(0.90));
         creditsBtn.on('pointerout', () => creditsBtn.setAlpha(1));
+        creditsBtn.on('pointerdown', () => this.showCreditsOverlay());
 
         // Level overlay (hidden by default)
         this.levelOverlay = this.buildLevelOverlay();
         this.levelOverlay.setVisible(false);
+
+        // Credits overlay (hidden by default)
+        this.creditsOverlay = this.buildCreditsOverlay();
+        this.creditsOverlay.setVisible(false);
     }
 
     // ── Robot walk loop ────────────────────────────────────────────────────
@@ -157,7 +164,7 @@ export class StartScene extends Scene {
         container.add(lvl1Text);
 
         // Close button
-        const closeBtn = this.add.text(W / 2, H / 2 + panelH / 2 - 40, '✕  FERMER', {
+        const closeBtn = this.add.text(W / 2, H / 2 + panelH / 2 - 40, '✕  CLOSE', {
             fontSize: '20px',
             color: '#aaaaaa',
             fontFamily: 'Arial',
@@ -172,5 +179,39 @@ export class StartScene extends Scene {
 
     private showLevelOverlay(): void {
         this.levelOverlay.setVisible(true);
+    }
+
+    // ── Credits overlay ────────────────────────────────────────────────────
+
+    private buildCreditsOverlay(): GameObjects.Container {
+        const W = this.scale.width;
+        const H = this.scale.height;
+        const container = this.add.container(0, 0).setDepth(50);
+
+        // Dark backdrop — blocks clicks on scene beneath
+        const backdrop = this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.75)
+            .setInteractive();
+        container.add(backdrop);
+
+        // Credits panel
+        const creditsPanel = this.add.image(W / 2, H / 2, 'credits-panel');
+        container.add(creditsPanel);
+
+        // Close button
+        const closeBtn = this.add.text(W / 2, H / 2 + 250, '✕  CLOSE', {
+            fontSize: '20px',
+            color: '#000000',
+            fontFamily: 'Arial',
+        }).setOrigin(0.5, 0.5).setInteractive({ useHandCursor: true });
+        closeBtn.on('pointerover', () => closeBtn.setColor('#ffffff'));
+        closeBtn.on('pointerout', () => closeBtn.setColor('#000000'));
+        closeBtn.on('pointerdown', () => this.creditsOverlay.setVisible(false));
+        container.add(closeBtn);
+
+        return container;
+    }
+
+    private showCreditsOverlay(): void {
+        this.creditsOverlay.setVisible(true);
     }
 }
