@@ -80,6 +80,10 @@ export class LoadingScene extends Scene {
         this.load.image('play-btn',     'play-btn.png');
         this.load.image('credits-btn',  'credits-btn.png');
 
+        // UI elements
+        this.load.image('controls',     'controls.png');
+        this.load.image('settings-btn',  'settings-btn.png');
+
         // Backgrounds
         this.load.image('background',   'background.png');
 
