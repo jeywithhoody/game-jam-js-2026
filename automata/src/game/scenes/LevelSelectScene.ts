@@ -13,6 +13,11 @@ export class LevelSelectScene extends Scene {
             name: 'Level 1: Lavomata',
             sceneName: SceneNames.Level1,
             description: 'Sort and wash the laundry'
+        },
+        {
+            name: 'Level 2: Restomata',
+            sceneName: SceneNames.Level2,
+            description: 'Automate a restaurant kitchen'
         }
     ];
 

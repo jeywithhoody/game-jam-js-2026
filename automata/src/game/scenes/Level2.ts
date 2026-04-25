@@ -1,100 +1,109 @@
 import { Level } from './Level';
 import SceneNames from './SceneName';
-import { Level1Grid } from '../grid/Level1Grid';
+import { Level2Grid } from '../grid/Level2Grid';
 import { LevelZoneScene } from './LevelZoneScene';
 import { CardType, CardSpeed } from './MovementCardsScene';
-import { Level1Metadata, LevelMetadata } from '../util/LevelMetadata';
+import { Level2Metadata, LevelMetadata } from '../util/LevelMetadata';
 import { LevelInfoScene } from './LevelInfoScene';
 
-
 /**
- * (Level1 : Lavomata )
- * Level flow :
- * Placement initial Robo -> Déplacement -> Pile de vêtements -> Triage -> Déplacement -> Laveuse -> Déplacement -> Sécheuse -> Déplacement -> Panier à linge -> Déplacement -> Pliage -> Déplacement -> Mise en inventaire -> Déplacement -> Revenir position initial Robo
- * */
+ * Level2 : Restomata - Restaurant Automation
+ * Level flow:
+ * Take ingredients -> Prep at station -> Cook on stove -> Plate meal -> Serve to customer -> 
+ * Dispose waste in trash -> Wash dirty dishes -> Return to starting position
+ */
 
 const zoneIdToActionIndex: Record<string, number> = {
-    'clothes-pile': 0,
-    'sorting-station': 1,
-    'washer-put': 2,
-    'washer-take': 3,
-    'dryer-put': 4,
-    'dryer-take': 5,
-    'folding-station': 6,
-    'basket': 7,
-    'finish': 8
+    'ingredient-storage': 0,
+    'prep-station-put': 1,
+    'prep-station-take': 2,
+    'stove-put': 3,
+    'stove-take': 4,
+    'plate-station-put': 5,
+    'plate-station-take': 6,
+    'serving-counter': 7,
+    'trash-zone': 8,
+    'sink': 9,
+    'finish': 10
 };
 
-export class Level1 extends Level
-{
-    private levelMetadata: LevelMetadata = Level1Metadata;
+export class Level2 extends Level {
+    private levelMetadata: LevelMetadata = Level2Metadata;
     private completedActions: Set<string> = new Set();
     private isExecutingSequence: boolean = false;
-    private washerSprites: Map<string, Phaser.GameObjects.Sprite> = new Map();
-    private selectedWasherPosition: { x: number, y: number } | null = null;
-    private sortingStationSprite: Phaser.GameObjects.Sprite | null = null;
 
-    constructor()
-    {
-        super(SceneNames.Level1);
+    constructor() {
+        super(SceneNames.Level2);
     }
 
     /**
-     * Cards that make up the Level 1 deck.
-     * DeckScene will shuffle these at level start.
-     * - 5 Take cards  (clothes-pile, sorting, washer-take, dryer-take, basket)
-     * - 3 Drop cards  (washer-put, dryer-put, folding-station)
-     * - Movement cards covering all directions at speeds 1 & 2
+     * Cards that make up the Level 2 deck (53 total).
+     * - 7 Take cards (ingredient-storage, prep-station-take, stove-take, plate-station-take, sink)
+     * - 6 Drop cards (prep-station-put, stove-put, plate-station-put, serving-counter, trash-zone)
+     * - Movement cards covering all directions at speeds 1 & 2 (40 cards total)
      */
-    private buildLevel1Cards(): Array<{ type: CardType; speed: CardSpeed }> {
+    private buildLevel2Cards(): Array<{ type: CardType; speed: CardSpeed }> {
         return [
-            // Take cards (5 needed for each pick-up action)
+            // Take cards (7 total for more complex flow)
+            { type: CardType.Take, speed: CardSpeed.One },
+            { type: CardType.Take, speed: CardSpeed.One },
             { type: CardType.Take, speed: CardSpeed.One },
             { type: CardType.Take, speed: CardSpeed.One },
             { type: CardType.Take, speed: CardSpeed.One },
             { type: CardType.Take, speed: CardSpeed.One },
             { type: CardType.Take, speed: CardSpeed.One },
 
-            // Drop cards (3 needed for each put-down action)
+            // Drop cards (6 total for more interactions)
+            { type: CardType.Drop, speed: CardSpeed.One },
+            { type: CardType.Drop, speed: CardSpeed.One },
+            { type: CardType.Drop, speed: CardSpeed.One },
             { type: CardType.Drop, speed: CardSpeed.One },
             { type: CardType.Drop, speed: CardSpeed.One },
             { type: CardType.Drop, speed: CardSpeed.One },
 
-            // Movement cards — Up
+            // Movement cards — Up (10 cards)
             { type: CardType.MoveUp, speed: CardSpeed.One },
             { type: CardType.MoveUp, speed: CardSpeed.One },
             { type: CardType.MoveUp, speed: CardSpeed.One },
             { type: CardType.MoveUp, speed: CardSpeed.One },
+            { type: CardType.MoveUp, speed: CardSpeed.One },
+            { type: CardType.MoveUp, speed: CardSpeed.Two },
             { type: CardType.MoveUp, speed: CardSpeed.Two },
             { type: CardType.MoveUp, speed: CardSpeed.Two },
             { type: CardType.MoveUp, speed: CardSpeed.Two },
             { type: CardType.MoveUp, speed: CardSpeed.Two },
 
-            // Movement cards — Down
+            // Movement cards — Down (10 cards)
             { type: CardType.MoveDown, speed: CardSpeed.One },
             { type: CardType.MoveDown, speed: CardSpeed.One },
             { type: CardType.MoveDown, speed: CardSpeed.One },
             { type: CardType.MoveDown, speed: CardSpeed.One },
+            { type: CardType.MoveDown, speed: CardSpeed.One },
+            { type: CardType.MoveDown, speed: CardSpeed.Two },
             { type: CardType.MoveDown, speed: CardSpeed.Two },
             { type: CardType.MoveDown, speed: CardSpeed.Two },
             { type: CardType.MoveDown, speed: CardSpeed.Two },
             { type: CardType.MoveDown, speed: CardSpeed.Two },
 
-            // Movement cards — Left
+            // Movement cards — Left (10 cards)
             { type: CardType.MoveLeft, speed: CardSpeed.One },
             { type: CardType.MoveLeft, speed: CardSpeed.One },
             { type: CardType.MoveLeft, speed: CardSpeed.One },
             { type: CardType.MoveLeft, speed: CardSpeed.One },
+            { type: CardType.MoveLeft, speed: CardSpeed.One },
+            { type: CardType.MoveLeft, speed: CardSpeed.Two },
             { type: CardType.MoveLeft, speed: CardSpeed.Two },
             { type: CardType.MoveLeft, speed: CardSpeed.Two },
             { type: CardType.MoveLeft, speed: CardSpeed.Two },
             { type: CardType.MoveLeft, speed: CardSpeed.Two },
 
-            // Movement cards — Right
+            // Movement cards — Right (10 cards)
             { type: CardType.MoveRight, speed: CardSpeed.One },
             { type: CardType.MoveRight, speed: CardSpeed.One },
             { type: CardType.MoveRight, speed: CardSpeed.One },
             { type: CardType.MoveRight, speed: CardSpeed.One },
+            { type: CardType.MoveRight, speed: CardSpeed.One },
+            { type: CardType.MoveRight, speed: CardSpeed.Two },
             { type: CardType.MoveRight, speed: CardSpeed.Two },
             { type: CardType.MoveRight, speed: CardSpeed.Two },
             { type: CardType.MoveRight, speed: CardSpeed.Two },
@@ -103,45 +112,38 @@ export class Level1 extends Level
     }
 
     /**
-     * Required assets :
-     * washer + other assets from Level class
-     *
+     * Required assets: same as Level class
      */
-    preload()
-    {
+    preload() {
         super.preload();
         this.load.setPath('assets');
     }
 
-    create()
-    {
+    create() {
         super.create();
-        this.levelGrid = new Level1Grid();
+        this.levelGrid = new Level2Grid();
         this.startX = this.levelMetadata.startPosition.x;
         this.startY = this.levelMetadata.startPosition.y;
-        
+
         // Set up action zones from metadata
         this.setupActionZones();
-        
+
         // Create robot sprite after grid is initialized
         this.createRobotSprite();
-        
-        // Initialize level info scene - launch first, then get
+
+        // Initialize level info scene
         this.scene.launch(SceneNames.LevelInfo);
         this.levelInfoScene = this.scene.get(SceneNames.LevelInfo) as LevelInfoScene;
         this.levelInfoScene.setLevelMetadata(this.levelMetadata);
         this.levelInfoScene.startTimer();
-        
+
         // Initialize level zone scene with grid visuals
         this.levelZoneScene = new LevelZoneScene(this);
         this.levelZoneScene.initializeGridVisuals(this.levelGrid);
-        this.washerSprites.forEach(sprite => {
-            this.levelZoneScene!.getContainer().add(sprite);  // Add washer to container
-        });
-        this.levelZoneScene!.getContainer().add(this.robotSprite);  // Add robot above washer
+        this.levelZoneScene!.getContainer().add(this.robotSprite);
 
-        // Hand the Level 1 card list to DeckScene — it will shuffle them
-        this.setupDeckCards(this.buildLevel1Cards());
+        // Hand the Level 2 card list to DeckScene
+        this.setupDeckCards(this.buildLevel2Cards());
 
         // Set up card play callback for individual card clicks
         this.cardScene.onCardPlay((cardType, cardSpeed, cardIndex) => {
@@ -155,131 +157,88 @@ export class Level1 extends Level
     }
 
     /**
-     * Set up action zones for Level 1
+     * Set up action zones for Level 2
      */
     private setupActionZones(): void {
-        // Action zones based on Level1Grid layout
-        // Zone locations: washer(2,0), sorting(1,1), dryer(3,1), basket(4,0), folding(2,2)
-
-        this.actionZoneSystem.addZone('clothes-pile', {
-            x: 0, y: 0,
+        // Ingredient storage at (1, 0) - take action
+        this.actionZoneSystem.addZone('ingredient-storage', {
+            x: 1, y: 0,
             actionType: 'take',
-            itemType: 'Dirty Clothes',
-            name: 'Clothes Pile'
+            itemType: 'Raw Ingredients',
+            name: 'Ingredient Storage'
         });
 
-        this.actionZoneSystem.addZone('sorting-station', {
-            x: 1, y: 1,
-            actionType: 'take',
-            itemType: 'Sorted Clothes',
-            name: 'Sorting Station'
-        });
-
-        this.actionZoneSystem.addZone('washer-put', {
-            x: 2, y: 0,
+        // Prep station at (2, 1) - put and take actions
+        this.actionZoneSystem.addZone('prep-station-put', {
+            x: 2, y: 1,
             actionType: 'put',
-            itemType: 'Clothes',
-            name: 'Washing Machine (Drop)'
+            itemType: 'Ingredients',
+            name: 'Prep Station (Drop)'
         });
 
-        this.actionZoneSystem.addZone('washer-take', {
-            x: 2, y: 0,
+        this.actionZoneSystem.addZone('prep-station-take', {
+            x: 2, y: 1,
             actionType: 'take',
-            itemType: 'Washed Clothes',
-            name: 'Washing Machine (Take)',
+            itemType: 'Prepared Ingredients',
+            name: 'Prep Station (Take)',
             allowMultiple: true
         });
 
-        this.actionZoneSystem.addZone('dryer-put', {
-            x: 3, y: 1,
+        // Stove at (3, 2) - put and take actions
+        this.actionZoneSystem.addZone('stove-put', {
+            x: 3, y: 2,
             actionType: 'put',
-            itemType: 'Washed Clothes',
-            name: 'Dryer (Drop)'
+            itemType: 'Ingredients',
+            name: 'Stove (Drop)'
         });
 
-        this.actionZoneSystem.addZone('dryer-take', {
-            x: 3, y: 1,
+        this.actionZoneSystem.addZone('stove-take', {
+            x: 3, y: 2,
             actionType: 'take',
-            itemType: 'Dry Clothes',
-            name: 'Dryer (Take)',
+            itemType: 'Cooked Food',
+            name: 'Stove (Take)',
             allowMultiple: true
         });
 
-        this.actionZoneSystem.addZone('folding-station', {
-            x: 2, y: 2,
+        // Plate station at (2, 3) - put and take actions
+        this.actionZoneSystem.addZone('plate-station-put', {
+            x: 2, y: 3,
             actionType: 'put',
-            itemType: 'Dry Clothes',
-            name: 'Folding Station'
+            itemType: 'Food',
+            name: 'Plate Station (Drop)'
         });
 
-        this.actionZoneSystem.addZone('basket', {
-            x: 4, y: 0,
+        this.actionZoneSystem.addZone('plate-station-take', {
+            x: 2, y: 3,
             actionType: 'take',
-            itemType: 'Folded Clothes',
-            name: 'Basket'
+            itemType: 'Plated Meal',
+            name: 'Plate Station (Take)',
+            allowMultiple: true
         });
 
-        // Create washer sprite at the center of the washer action zone (2, 0)
-        this.createWasherSprite(2, 0);
-        this.createWasherSprite(3, 1);
-        this.createSortingStationSprite(1, 1);
-    }
-
-    /**
-     * Create the washer machine sprite at its grid position
-     */
-    private createWasherSprite(x: number, y: number): void {
-        if (!this.levelGrid) return;
-        
-        // Get the world position for the washer at grid (2, 0)
-        const worldPos = this.levelGrid.getWorldPosition(x, y);
-        
-        // Create washer sprite at absolute position (will be converted to relative when added to container)
-        const washerSprite = this.add.sprite(
-            this.levelZoneX + worldPos.x,
-            this.levelZoneY + worldPos.y,
-            'washer-machine-run1'
-        );
-        this.washerSprites.set(`${x},${y}`, washerSprite);
-        console.log(this.washerSprites)
-        washerSprite.setScale(0.3);
-        washerSprite.setCrop(118, 49, 342, 314);
-        washerSprite.setOrigin(0.75, 0.55);
-        washerSprite.setDepth(90); // Below robot (100) but above grid visuals
-
-        // Create animation for the washer machine
-        this.anims.create({
-            key: `washer-running-${x}-${y}`, // Unique key for each washer
-            frames: [
-                { key: 'washer-machine-run1' },
-                { key: 'washer-machine-run2' },
-                { key: 'washer-machine-run3' },
-                { key: 'washer-machine-run5' },
-                { key: 'washer-machine-run6' }
-            ],
-            frameRate: 8,
-            repeat: 3  // Repeat 3 times when triggered
+        // Serving counter at (1, 4) - put action
+        this.actionZoneSystem.addZone('serving-counter', {
+            x: 1, y: 4,
+            actionType: 'put',
+            itemType: 'Meal',
+            name: 'Serving Counter'
         });
-    }
 
-    private createSortingStationSprite(x: number, y: number): void {
-        if (!this.levelGrid) return;
-        
-        // Get the world position for the sorting station at grid (1, 1)
-        const worldPos = this.levelGrid.getWorldPosition(x, y);
-        
+        // Trash zone at (3, 4) - put action
+        this.actionZoneSystem.addZone('trash-zone', {
+            x: 3, y: 4,
+            actionType: 'put',
+            itemType: 'Waste',
+            name: 'Trash Zone'
+        });
 
-        const clothSorting = this.add.sprite(
-            this.levelZoneX + worldPos.x,
-            this.levelZoneY + worldPos.y,
-            'cloth-sorting0059');
-        clothSorting.setCrop(477, 114, 322, 324);
-        clothSorting.setDepth(50);
-        clothSorting.setScale(0.55);
-        clothSorting.setOrigin(0.33, 0.30);
-        clothSorting.setDepth(80); // Below robot but above washer
-
-        this.sortingStationSprite = clothSorting;
+        // Sink at (1, 5) - take action
+        this.actionZoneSystem.addZone('sink', {
+            x: 1, y: 5,
+            actionType: 'take',
+            itemType: 'Dirty Dishes',
+            name: 'Sink'
+        });
     }
 
     /**
@@ -288,11 +247,9 @@ export class Level1 extends Level
     private onCardPlayed(data: { cardType: CardType; cardSpeed: CardSpeed; cardIndex: number }): void {
         console.log(`Card played: ${data.cardType} (speed: ${data.cardSpeed})`);
 
-        // Try to execute the card movement
         const success = this.playCard(data.cardType, data.cardSpeed as unknown as CardSpeed);
 
         if (success) {
-            // Remove the card from hand after successful move
             this.cardScene.removeCardFromHand(data.cardIndex);
         } else {
             console.log('Move was invalid or robot is already moving');
@@ -300,13 +257,12 @@ export class Level1 extends Level
     }
 
     /**
-     * Override playCard to handle Take/Drop actions and trigger washer animation
+     * Override playCard to handle Take/Drop actions
      */
     public playCard(cardType: CardType, cardSpeed: CardSpeed): boolean {
-        // Call parent implementation
         const success = super.playCard(cardType, cardSpeed);
 
-        // If it's a Drop action that succeeded, handle action zone effects
+        // Handle Drop actions
         if (success && cardType === CardType.Drop) {
             const robotPos = this.levelGrid.getRobotPosition();
             const actionZone = this.actionZoneSystem.canPerformAction(robotPos.x, robotPos.y, 'put');
@@ -318,16 +274,11 @@ export class Level1 extends Level
                     this.completedActions.add(actionZone.zoneId);
                     const dropIdx = zoneIdToActionIndex[actionZone.zoneId];
                     if (dropIdx !== undefined) this.levelInfoScene?.markActionComplete(dropIdx);
-
-                    // Trigger washer animation when robot puts clothes in the washer
-                    if (actionZone.zoneId === 'washer-put') {
-                        this.animateWasher();
-                    }
                 }
             }
         }
 
-        // Handle Take actions similarly
+        // Handle Take actions
         if (success && cardType === CardType.Take) {
             const robotPos = this.levelGrid.getRobotPosition();
             const actionZone = this.actionZoneSystem.canPerformAction(robotPos.x, robotPos.y, 'take');
@@ -351,18 +302,9 @@ export class Level1 extends Level
      */
     private showFailedPanel(): void {
         this.scene.get(SceneNames.SoundScene).playFail();
-        // Position panel above the card scene area
         this.cardScene.showFailedPanel();
 
-        // Add click to close functionality
-        // overlay.on('pointerdown', () => {
-        //     overlay.destroy();
-        //     failedPanel.destroy();
-        // });
-
-        // Auto-hide after 2 seconds
         this.time.delayedCall(2000, () => {
-            // overlay.destroy();
             this.cardScene.hideFailedPanel();
         });
     }
@@ -419,7 +361,6 @@ export class Level1 extends Level
     protected onRobotMovementComplete(): void {
         const robotPos = this.levelGrid.getRobotPosition();
 
-        // Check for action zones at this position (no filter - just checking if zone exists)
         const actionZone = this.actionZoneSystem.canPerformAction(robotPos.x, robotPos.y);
 
         if (actionZone.can && actionZone.zoneId) {
@@ -430,52 +371,8 @@ export class Level1 extends Level
                 this.completedActions.add(actionZone.zoneId);
                 const moveIdx = zoneIdToActionIndex[actionZone.zoneId];
                 if (moveIdx !== undefined) this.levelInfoScene?.markActionComplete(moveIdx);
-
-                // Trigger washer animation when robot puts clothes in the washer
-                if (actionZone.zoneId === 'washer-put' && actionZone.action === 'put') {
-                    this.selectedWasherPosition = { x: robotPos.x, y: robotPos.y };
-                    console.log('Triggering washer animation from movement completion');
-                    console.log(`Selected washer position: (${this.selectedWasherPosition.x}, ${this.selectedWasherPosition.y})`);
-                    console.log(`Washer sprites available: ${this.washerSprites}`);
-                    this.animateWasher();
-                }
-                if (actionZone.zoneId === 'sorting-station' && actionZone.action === 'take') {
-                    console.log('Triggering sorting station animation from movement completion');
-                    this.animateSortingStation();
-                }
             }
         }
-    }
-
-    /**
-     * Animate the washer machine sprite
-     */
-    private animateWasher(): void {
-        if (!this.selectedWasherPosition) return;
-        const washer = this.washerSprites.get(`${this.selectedWasherPosition.x},${this.selectedWasherPosition.y}`);
-        if (!washer) return;
-
-        // Play the washer running animation
-        washer.play(`washer-running-${this.selectedWasherPosition.x}-${this.selectedWasherPosition.y}`);
-        this.scene.get(SceneNames.SoundScene).playMachineSound();
-        this.scene.get(SceneNames.SoundScene).playWaterSplash();
-
-        // Optional: Add a slight shake effect for more dynamism
-        this.tweens.add({
-            targets: washer,
-            x: washer.x + 2,
-            duration: 100,
-            yoyo: true,
-            repeat: 11,  // 12 total oscillations (3 seconds at 100ms each)
-            ease: 'Sine.easeInOut'
-        });
-    }
-
-    private animateSortingStation(): void {
-        if (!this.sortingStationSprite) return;
-
-        this.scene.get(SceneNames.SoundScene).playPhysicalTask();
-        this.sortingStationSprite.play('cloth-sorting-station');
     }
 
     /**
@@ -485,16 +382,18 @@ export class Level1 extends Level
         const robotPos = this.levelGrid.getRobotPosition();
         const atStartPosition = robotPos.x === this.startX && robotPos.y === this.startY;
 
-        // Required actions for winning
+        // Required actions for winning (all restaurant tasks)
         const requiredActions = [
-            'clothes-pile',
-            'sorting-station',
-            'washer-put',
-            'washer-take',
-            'dryer-put',
-            'dryer-take',
-            'folding-station',
-            'basket'
+            'ingredient-storage',
+            'prep-station-put',
+            'prep-station-take',
+            'stove-put',
+            'stove-take',
+            'plate-station-put',
+            'plate-station-take',
+            'serving-counter',
+            'trash-zone',
+            'sink'
         ];
 
         const allActionsCompleted = requiredActions.every(action => this.completedActions.has(action));
@@ -519,10 +418,10 @@ export class Level1 extends Level
         const seconds = totalSeconds % 60;
         const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
-        console.log(`🎉 Level completed in ${timeStr}!`);
+        console.log(`🎉 Level 2 completed in ${timeStr}!`);
 
         // Store high score
-        this.registry.set('level1_best_time', totalSeconds);
+        this.registry.set('level2_best_time', totalSeconds);
 
         // Show win screen with notification about next level
         const winText = this.add.text(this.scale.width / 2, this.scale.height / 2 - 40, `LEVEL COMPLETE!\nTime: ${timeStr}`, {
@@ -534,26 +433,27 @@ export class Level1 extends Level
         }).setOrigin(0.5).setDepth(200);
 
         // Show transition message
-        const transitionText = this.add.text(this.scale.width / 2, this.scale.height / 2 + 80, `Moving to Level 2 in 5 seconds...`, {
+        const transitionText = this.add.text(this.scale.width / 2, this.scale.height / 2 + 80, `Moving to Level 3 in 5 seconds...`, {
             fontSize: '24px',
             color: '#ffff00',
             fontFamily: 'Arial',
             align: 'center'
         }).setOrigin(0.5).setDepth(200);
 
-        // Transition to Level 2 after 5 seconds
+        // Transition to Level 3 after 5 seconds
         this.time.delayedCall(5000, () => {
             this.scene.stop();
-            this.scene.start(SceneNames.Level2);
+            // When Level 3 exists, uncomment this:
+            // this.scene.start(SceneNames.Level3);
+            // For now, go back to level select
+            this.scene.start(SceneNames.LevelSelect);
         });
     }
 
-    update(time: number, delta: number)
-    {
+    update(time: number, delta: number) {
         super.update(time, delta);
     }
 
-    draw()
-    {
+    draw() {
     }
 }
