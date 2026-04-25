@@ -39,7 +39,7 @@ export class SoundScene extends Scene {
         const loopMarker = {
             name: 'loop',
             start: delay,
-            duration: 1 * 60.00,
+            //duration: 1 * 60.00,
             config: {
                 loop: true
             }
@@ -60,11 +60,11 @@ export class SoundScene extends Scene {
     }
 
     setSfxVolume(volume: number) {
-        this.setSoundGain({ sfx: volume })
+        this.setSoundGain({ sfx: volume });
     }
 
     playRobotSound() {
-        this.playSound('robot_sound')
+        this.playSound('robot_sound');
     }
 
     private playSound(soundIdentifierName: string) {

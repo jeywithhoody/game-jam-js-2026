@@ -7,6 +7,10 @@ export class SettingsScene extends Scene {
     private brightnessSlider: GameObjects.Container;
     private previousScene: string = SceneNames.Start;
 
+    private masterVolumeSliderValue: number = 1;
+    private musicVolumeSliderValue: number = 1;
+    private sfxVolumeSliderValue: number = 1;
+
     constructor() {
         super(SceneNames.Settings);
     }
@@ -44,6 +48,7 @@ export class SettingsScene extends Scene {
         title.setOrigin(0.5);
         title.setDepth(202);
 
+
         // Master Volume Label
         const masterLabel = this.add.text(centerX - 200, centerY - 80, 'Master Volume:', {
             fontSize: '16px',
@@ -55,9 +60,11 @@ export class SettingsScene extends Scene {
         // Master Volume Slider
         this.masterVolumeSlider = this.createSlider(
             centerX - 200, centerY - 50,
-            this.sound.volume,
+            this.masterVolumeSliderValue,
             (value) => {
-                this.sound.volume = value;
+                this.masterVolumeSliderValue = value;
+                const poweredValue = this.sliderToGain(value);
+                this.scene.get(SceneNames.SoundScene).setMasterVolume(poweredValue);
             }
         );
         this.masterVolumeSlider.setDepth(202);
@@ -70,35 +77,37 @@ export class SettingsScene extends Scene {
         });
         sfxLabel.setDepth(202);
 
-        // SFX Volume Slider (stored in registry)
-        const sfxVolume = this.registry.get('sfxVolume') || 1;
+        // SFX Volume Slider
         this.sfxVolumeSlider = this.createSlider(
             centerX - 200, centerY + 20,
-            sfxVolume,
+            this.sfxVolumeSliderValue,
             (value) => {
-                this.registry.set('sfxVolume', value);
+                this.sfxVolumeSliderValue = value;
+                const poweredValue = this.sliderToGain(value);
+                this.scene.get(SceneNames.SoundScene).setSfxVolume(poweredValue);
             }
         );
         this.sfxVolumeSlider.setDepth(202);
 
-        // Brightness Label
-        const brightnessLabel = this.add.text(centerX - 200, centerY + 60, 'Brightness:', {
+        // Music Volume Label
+        const musicLabel = this.add.text(centerX - 200, centerY + 60, 'Music Volume:', {
             fontSize: '16px',
             color: '#ffffff',
             fontFamily: 'Arial'
         });
-        brightnessLabel.setDepth(202);
+        musicLabel.setDepth(202);
 
-        // Brightness Slider (stored in registry)
-        const brightness = this.registry.get('brightness') || 1;
-        this.brightnessSlider = this.createSlider(
+        // Music Volume Slider
+        this.musicVolumeSlider = this.createSlider(
             centerX - 200, centerY + 90,
-            brightness,
+            this.musicVolumeSliderValue,
             (value) => {
-                this.registry.set('brightness', value);
+                this.musicVolumeSliderValue = value;
+                const poweredValue = this.sliderToGain(value);
+                this.scene.get(SceneNames.SoundScene).setMusicVolume(poweredValue);
             }
         );
-        this.brightnessSlider.setDepth(202);
+        this.musicVolumeSlider.setDepth(202);
 
         // Back Button
         const backButton = this.createButton(centerX, centerY + 160, 'BACK', () => {
@@ -184,5 +193,10 @@ export class SettingsScene extends Scene {
         if (this.previousScene === SceneNames.PauseMenu) {
             this.scene.resume(SceneNames.PauseMenu);
         }
+    }
+
+    private sliderToGain(slider: number): number {
+        if (slider <= 0) return 0;
+        return Math.pow(slider, 2);
     }
 }

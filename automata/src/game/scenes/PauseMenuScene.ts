@@ -8,10 +8,6 @@ export class PauseMenuScene extends Scene {
     private quitButton: GameObjects.Container;
     private settingsButton: GameObjects.Container;
 
-    private masterVolumeSliderValue: number = 1;
-    private musicVolumeSliderValue: number = 1;
-    private sfxVolumeSliderValue: number = 1;
-
     constructor() {
         super(SceneNames.PauseMenu);
     }
@@ -93,74 +89,6 @@ export class PauseMenuScene extends Scene {
         controlsImage.setDepth(202);
     }
 
-
-        // Master Volume Label
-        const masterLabel = this.add.text(centerX - 200, centerY - 80, 'Master Volume:', {
-            fontSize: '16px',
-            color: '#ffffff',
-            fontFamily: 'Arial'
-        });
-        this.settingsPanel.add(masterLabel);
-
-        // Master Volume Slider
-        this.masterVolumeSlider = this.createSlider(
-            centerX - 200, centerY - 50,
-            this.masterVolumeSliderValue,
-            (value) => {
-                this.masterVolumeSliderValue = value;
-                const poweredValue = this.sliderToGain(value);
-                this.scene.get(SceneNames.SoundScene).setMasterVolume(poweredValue);
-            }
-        );
-        this.settingsPanel.add(this.masterVolumeSlider);
-
-        // SFX Volume Label
-        const sfxLabel = this.add.text(centerX - 200, centerY - 10, 'SFX Volume:', {
-            fontSize: '16px',
-            color: '#ffffff',
-            fontFamily: 'Arial'
-        });
-        this.settingsPanel.add(sfxLabel);
-
-        // SFX Volume Slider
-        this.sfxVolumeSlider = this.createSlider(
-            centerX - 200, centerY + 20,
-            this.sfxVolumeSliderValue,
-            (value) => {
-                this.sfxVolumeSliderValue = value;
-                const poweredValue = this.sliderToGain(value);
-                this.scene.get(SceneNames.SoundScene).setSfxVolume(poweredValue);
-            }
-        );
-        this.settingsPanel.add(this.sfxVolumeSlider);
-
-        // Music Volume Label
-        const musicLabel = this.add.text(centerX - 200, centerY + 60, 'Music Volume:', {
-            fontSize: '16px',
-            color: '#ffffff',
-            fontFamily: 'Arial'
-        });
-        this.settingsPanel.add(musicLabel);
-
-        // Music Volume Slider
-        this.musicVolumeSlider = this.createSlider(
-            centerX - 200, centerY + 90,
-            this.musicVolumeSliderValue,
-            (value) => {
-                this.musicVolumeSliderValue = value;
-                const poweredValue = this.sliderToGain(value);
-                this.scene.get(SceneNames.SoundScene).setMusicVolume(poweredValue);
-            }
-        );
-        this.settingsPanel.add(this.musicVolumeSlider);
-
-        // Back Button
-        const backButton = this.createButton(centerX, centerY + 160, 'BACK', () => {
-            this.hideSettings();
-        });
-        this.settingsPanel.add(backButton);
-    }
-
     private createButton(x: number, y: number, label: string, callback: () => void): GameObjects.Container {
         const container = this.add.container(x, y);
         container.setDepth(202);
@@ -228,10 +156,5 @@ export class PauseMenuScene extends Scene {
         levelInfoScene?.setLevelMetadata(null);
         this.scene.stop(SceneNames.LevelInfo);
         this.scene.start(SceneNames.Start);
-    }
-
-    private sliderToGain(slider: number): number {
-        if (slider <= 0) return 0;
-        return Math.pow(slider, 2);
     }
 }

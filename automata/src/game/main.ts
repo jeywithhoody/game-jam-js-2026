@@ -29,8 +29,8 @@ const config: Types.Core.GameConfig = {
         Level1,
         LevelInfoScene,
         PauseMenuScene,
+        SettingsScene,
         SoundScene,
-        SettingsScene
     ],
 };
 
