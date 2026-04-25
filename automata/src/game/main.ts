@@ -27,7 +27,7 @@ const config: Types.Core.GameConfig = {
         Level1,
         LevelInfoScene,
         PauseMenuScene
-    ]
+    ],
 };
 
 const StartGame = (parent: string) => {
