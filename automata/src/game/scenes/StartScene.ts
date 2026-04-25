@@ -3,7 +3,6 @@ import SceneNames from './SceneName';
 
 export class StartScene extends Scene {
     private robot: GameObjects.Sprite;
-    private levelOverlay: GameObjects.Container;
     private creditsOverlay: GameObjects.Container;
 
     constructor() {
@@ -64,7 +63,7 @@ export class StartScene extends Scene {
         playBtn.on('pointerout', () => playBtn.setAlpha(1));
         playBtn.on('pointerdown', () => {
             this.scene.get(SceneNames.SoundScene).playButtonClick();
-            this.showLevelOverlay();
+            this.scene.launch(SceneNames.LevelSelect, { isOverlay: true });
         });
 
         // Settings button
@@ -99,10 +98,6 @@ export class StartScene extends Scene {
             this.showCreditsOverlay();
         });
 
-        // Level overlay (hidden by default)
-        this.levelOverlay = this.buildLevelOverlay();
-        this.levelOverlay.setVisible(false);
-
         // Credits overlay (hidden by default)
         this.creditsOverlay = this.buildCreditsOverlay();
         this.creditsOverlay.setVisible(false);
@@ -127,73 +122,6 @@ export class StartScene extends Scene {
             ease: 'Linear',
             onComplete: () => setTimeout(() => this.spawnRobot(!fromRight), 500),
         });
-    }
-
-    // ── Level overlay ──────────────────────────────────────────────────────
-
-    private buildLevelOverlay(): GameObjects.Container {
-        const W = this.scale.width;
-        const H = this.scale.height;
-        const container = this.add.container(0, 0).setDepth(50);
-
-        // Dark backdrop — blocks clicks on scene beneath
-        const backdrop = this.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.75)
-            .setInteractive();
-        container.add(backdrop);
-
-        // Panel
-        const panelW = 640;
-        const panelH = 420;
-        const panel = this.add.rectangle(W / 2, H / 2, panelW, panelH, 0x111111, 1);
-        panel.setStrokeStyle(3, 0x00ff00);
-        container.add(panel);
-
-        // Title
-        const title = this.add.text(W / 2, H / 2 - panelH / 2 + 40, 'SELECT LEVEL', {
-            fontSize: '38px',
-            color: '#ffffff',
-            fontFamily: 'Arial',
-            fontStyle: 'bold',
-        }).setOrigin(0.5, 0.5);
-        container.add(title);
-
-        // Level 1 button
-        const lvl1Bg = this.add.rectangle(W / 2, H / 2 - 20, 460, 90, 0x037a00)
-            .setStrokeStyle(2, 0xaaaaaa)
-            .setInteractive({ useHandCursor: true });
-        const lvl1Text = this.add.text(W / 2, H / 2 - 20, 'Level 1 : Lavomata', {
-            fontSize: '26px',
-            color: '#ffffff',
-            fontFamily: 'Arial',
-        }).setOrigin(0.5, 0.5);
-        lvl1Bg.on('pointerover', () => { lvl1Bg.setFillStyle(0x025c00); lvl1Text.setColor('#ffffff'); });
-        lvl1Bg.on('pointerout', () => { lvl1Bg.setFillStyle(0x037a00); lvl1Text.setColor('#ffffff'); });
-        lvl1Bg.on('pointerdown', () => {
-            this.scene.get(SceneNames.SoundScene).playButtonClick();
-            this.scene.start(SceneNames.Level1);
-        });
-        container.add(lvl1Bg);
-        container.add(lvl1Text);
-
-        // Close button
-        const closeBtn = this.add.text(W / 2, H / 2 + panelH / 2 - 40, '✕  CLOSE', {
-            fontSize: '20px',
-            color: '#aaaaaa',
-            fontFamily: 'Arial',
-        }).setOrigin(0.5, 0.5).setInteractive({ useHandCursor: true });
-        closeBtn.on('pointerover', () => closeBtn.setColor('#ffffff'));
-        closeBtn.on('pointerout', () => closeBtn.setColor('#aaaaaa'));
-        closeBtn.on('pointerdown', () => {
-            this.scene.get(SceneNames.SoundScene).playButtonClick();
-            this.levelOverlay.setVisible(false);
-        });
-        container.add(closeBtn);
-
-        return container;
-    }
-
-    private showLevelOverlay(): void {
-        this.levelOverlay.setVisible(true);
     }
 
     // ── Credits overlay ────────────────────────────────────────────────────
