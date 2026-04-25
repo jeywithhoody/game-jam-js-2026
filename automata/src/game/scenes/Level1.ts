@@ -403,14 +403,15 @@ export class Level1 extends Level
 
             // Small delay between cards
             await new Promise(resolve => setTimeout(resolve, 200));
+
+            // Check win condition
+            this.checkWinCondition();
         }
 
         // Remove all cards from hand
         this.cardScene.clearHand();
         this.isExecutingSequence = false;
 
-        // Check win condition
-        this.checkWinCondition();
     }
 
     /**

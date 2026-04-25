@@ -345,14 +345,14 @@ export class Level2 extends Level {
 
             // Small delay between cards
             await new Promise(resolve => setTimeout(resolve, 200));
+
+            // Check win condition
+            this.checkWinCondition();
         }
 
         // Remove all cards from hand
         this.cardScene.clearHand();
         this.isExecutingSequence = false;
-
-        // Check win condition
-        this.checkWinCondition();
     }
 
     /**
@@ -433,7 +433,7 @@ export class Level2 extends Level {
         }).setOrigin(0.5).setDepth(200);
 
         // Show transition message
-        const transitionText = this.add.text(this.scale.width / 2, this.scale.height / 2 + 80, `Moving to Level 3 in 5 seconds...`, {
+        const transitionText = this.add.text(this.scale.width / 2, this.scale.height / 2 + 80, `Moving to Level 3 (or StartMenu) in 5 seconds...`, {
             fontSize: '24px',
             color: '#ffff00',
             fontFamily: 'Arial',
@@ -446,7 +446,7 @@ export class Level2 extends Level {
             // When Level 3 exists, uncomment this:
             // this.scene.start(SceneNames.Level3);
             // For now, go back to level select
-            this.scene.start(SceneNames.LevelSelect);
+            this.scene.get(SceneNames.PauseMenu).quitLevel();
         });
     }
 
