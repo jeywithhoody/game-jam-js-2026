@@ -38,15 +38,6 @@ export class LevelInfoScene extends Scene {
             this.timerText = null;
         });
 
-        // Create background
-        // const bg = this.add.rectangle(
-        //     0, 0,
-        //     310, this.scale.height,
-        //     0x1a3a2a, 1
-        // );
-        // bg.setOrigin(0, 0);
-        // bg.setDepth(0);
-
         // Create container for info
         this.infoContainer = this.add.container(panelPosition.x + padding, panelPosition.y + textZone + padding);
         this.infoContainer.setDepth(10);
@@ -203,7 +194,7 @@ export class LevelInfoScene extends Scene {
 
         metadata.actions.forEach((action, idx) => {
             if (yOffset > this.scale.height - 80) return; // Stop if running out of space
-            const actionText = `${idx + 1}. ${action.item.toUpperCase()} (${action.action.toUpperCase()} at ${action.position.x},${action.position.y})`;
+            const actionText = `${idx + 1}. ${action.item.toUpperCase()} (${action.action === 'take' ? 'Take' : action.action === 'put' ? 'Drop' : ''} at ${action.position.x},${action.position.y})`;
             const shortAction = actionText.length > 100 ? actionText.substring(0, 97) + '...' : actionText;
             const actText = this.add.text(3, yOffset, shortAction, textConfig);
             this.infoContainer.add(actText);

@@ -47,7 +47,7 @@ export class StartScene extends Scene {
         this.robot.setScale(0.8);
         this.robot.setDepth(10);
         this.robot.play('robot-start-walk');
-        this.spawnRobot();
+        this.spawnRobot(false);
 
         // Play button
         const playBtn = this.add.image(W / 2, H * 0.55, 'play-btn')
@@ -94,24 +94,22 @@ export class StartScene extends Scene {
 
     // ── Robot walk loop ────────────────────────────────────────────────────
 
-    private spawnRobot(): void {
-        const W = this.scale.width;
-        const fromLeft = Math.random() < 0.5;
+    private spawnRobot(reverse: boolean): void {
         const randomY = 800 + Math.random() * 500;
         this.robot.y = randomY;
-        this.robot.setFlipX(!fromLeft);
-        this.robot.x = fromLeft ? -120 : W + 500;
-        this.walkRobot(fromLeft);
+        this.robot.x = reverse ? this.scale.width + 750 : 0;
+
+        this.walkRobot(reverse);
     }
 
-    private walkRobot(fromLeft: boolean = true): void {
+    private walkRobot(fromRight: boolean = true): void {
         const W = this.scale.width;
         this.tweens.add({
             targets: this.robot,
-            x: fromLeft ? W + 250 : -120,
-            duration: 5000,
+            x: !fromRight ? W + 750 : -120,
+            duration: 8000,
             ease: 'Linear',
-            onComplete: () => this.spawnRobot(),
+            onComplete: () => setTimeout(() => this.spawnRobot(!fromRight), 500),
         });
     }
 
