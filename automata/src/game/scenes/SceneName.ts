@@ -6,6 +6,7 @@ const Level2 = "Level2";
 const LevelSelect = "LevelSelect";
 const LevelInfo = "LevelInfo";
 const PauseMenu = "PauseMenu";
+const SoundScene = "SoundScene";
 const Settings = "Settings";
 
-export default { Game, Loading, Start, Level1, Level2, LevelSelect, LevelInfo, PauseMenu, Settings }
+export default { Game, Loading, Start, Level1, Level2, LevelSelect, LevelInfo, PauseMenu, SoundScene, Settings }

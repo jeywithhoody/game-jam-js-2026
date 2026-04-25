@@ -211,6 +211,11 @@ export class LoadingScene extends Scene {
             });
         }
         this.robot.play('loading-robot-walk');
+
+        //Add sound scene
+        this.time.delayedCall(300, () => {
+            this.scene.start(SceneNames.SoundScene);
+        });
     }
 
     private onProgress(value: number): void {
