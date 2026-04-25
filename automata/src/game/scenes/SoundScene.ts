@@ -39,7 +39,7 @@ export class SoundScene extends Scene {
         const loopMarker = {
             name: 'loop',
             start: delay,
-            //duration: 1 * 60.00,
+            duration: 1 * 60.00,
             config: {
                 loop: true
             }
