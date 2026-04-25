@@ -25,7 +25,6 @@ export class Level extends Scene
     protected actionZoneSystem: ActionZoneSystem = null;
     protected startX: number = 0;
     protected startY: number = 0;
-    protected levelWon: boolean = false;
 
     constructor(levelName: string)
     {

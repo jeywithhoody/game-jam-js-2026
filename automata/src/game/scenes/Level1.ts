@@ -22,6 +22,7 @@ const zoneIdToActionIndex: Record<string, number> = {
     'dryer-take': 5,
     'folding-station': 6,
     'basket': 7,
+    'finish': 8
 };
 
 export class Level1 extends Level
@@ -386,9 +387,7 @@ export class Level1 extends Level
 
             if (!success) {
                 console.log(`Card ${i + 1} failed, stopping sequence`);
-                if(!this.levelWon) {
-                    this.showFailedPanel();
-                }
+                this.showFailedPanel();
                 break;
             }
 
@@ -511,7 +510,6 @@ export class Level1 extends Level
      * Handle level win
      */
     private levelWon(): void {
-        this.levelWon = true;
         this.levelInfoScene?.stopTimer();
         this.scene.get(SceneNames.SoundScene).playLevelWin();
 
