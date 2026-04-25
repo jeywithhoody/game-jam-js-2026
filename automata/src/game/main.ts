@@ -1,4 +1,3 @@
-import { Game as MainGame } from './scenes/Game';
 import { LoadingScene } from './scenes/LoadingScene';
 import { StartScene } from './scenes/StartScene';
 import { Level1 } from './scenes/Level1';
@@ -24,7 +23,6 @@ const config: Types.Core.GameConfig = {
     scene: [
         LoadingScene,
         StartScene,
-        MainGame,
         LevelSelectScene,
         Level1,
         LevelInfoScene,

@@ -62,7 +62,10 @@ export class StartScene extends Scene {
             });
         playBtn.on('pointerover', () => playBtn.setAlpha(0.90));
         playBtn.on('pointerout', () => playBtn.setAlpha(1));
-        playBtn.on('pointerdown', () => this.showLevelOverlay());
+        playBtn.on('pointerdown', () => {
+            this.scene.get(SceneNames.SoundScene).playButtonClick();
+            this.showLevelOverlay();
+        });
 
         // Settings button
         const settingsBtn = this.add.image(W / 2, H * 0.55, 'settings-btn')
@@ -75,7 +78,10 @@ export class StartScene extends Scene {
             });
         settingsBtn.on('pointerover', () => settingsBtn.setAlpha(0.90));
         settingsBtn.on('pointerout', () => settingsBtn.setAlpha(1));
-        settingsBtn.on('pointerdown', () => this.scene.launch(SceneNames.Settings, { previousScene: SceneNames.Start }));
+        settingsBtn.on('pointerdown', () => {
+            this.scene.get(SceneNames.SoundScene).playButtonClick();
+            this.scene.launch(SceneNames.Settings, { previousScene: SceneNames.Start });
+        });
 
         // Credits button
         const creditsBtn = this.add.image(W / 2, H * 0.55, 'credits-btn')
@@ -88,7 +94,10 @@ export class StartScene extends Scene {
             });
         creditsBtn.on('pointerover', () => creditsBtn.setAlpha(0.90));
         creditsBtn.on('pointerout', () => creditsBtn.setAlpha(1));
-        creditsBtn.on('pointerdown', () => this.showCreditsOverlay());
+        creditsBtn.on('pointerdown', () => {
+            this.scene.get(SceneNames.SoundScene).playButtonClick();
+            this.showCreditsOverlay();
+        });
 
         // Level overlay (hidden by default)
         this.levelOverlay = this.buildLevelOverlay();
@@ -159,7 +168,10 @@ export class StartScene extends Scene {
         }).setOrigin(0.5, 0.5);
         lvl1Bg.on('pointerover', () => { lvl1Bg.setFillStyle(0x025c00); lvl1Text.setColor('#ffffff'); });
         lvl1Bg.on('pointerout', () => { lvl1Bg.setFillStyle(0x037a00); lvl1Text.setColor('#ffffff'); });
-        lvl1Bg.on('pointerdown', () => this.scene.start(SceneNames.Level1));
+        lvl1Bg.on('pointerdown', () => {
+            this.scene.get(SceneNames.SoundScene).playButtonClick();
+            this.scene.start(SceneNames.Level1);
+        });
         container.add(lvl1Bg);
         container.add(lvl1Text);
 
@@ -171,7 +183,10 @@ export class StartScene extends Scene {
         }).setOrigin(0.5, 0.5).setInteractive({ useHandCursor: true });
         closeBtn.on('pointerover', () => closeBtn.setColor('#ffffff'));
         closeBtn.on('pointerout', () => closeBtn.setColor('#aaaaaa'));
-        closeBtn.on('pointerdown', () => this.levelOverlay.setVisible(false));
+        closeBtn.on('pointerdown', () => {
+            this.scene.get(SceneNames.SoundScene).playButtonClick();
+            this.levelOverlay.setVisible(false);
+        });
         container.add(closeBtn);
 
         return container;
@@ -205,7 +220,10 @@ export class StartScene extends Scene {
         }).setOrigin(0.5, 0.5).setInteractive({ useHandCursor: true });
         closeBtn.on('pointerover', () => closeBtn.setColor('#ffffff'));
         closeBtn.on('pointerout', () => closeBtn.setColor('#000000'));
-        closeBtn.on('pointerdown', () => this.creditsOverlay.setVisible(false));
+        closeBtn.on('pointerdown', () => {
+            this.scene.get(SceneNames.SoundScene).playButtonClick();
+            this.creditsOverlay.setVisible(false);
+        });
         container.add(closeBtn);
 
         return container;

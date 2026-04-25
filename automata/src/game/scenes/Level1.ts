@@ -349,6 +349,7 @@ export class Level1 extends Level
      * Show failed panel when a card fails
      */
     private showFailedPanel(): void {
+        this.scene.get(SceneNames.SoundScene).playFail();
         // Position panel above the card scene area
         this.cardScene.showFailedPanel();
 
@@ -385,7 +386,9 @@ export class Level1 extends Level
 
             if (!success) {
                 console.log(`Card ${i + 1} failed, stopping sequence`);
-                this.showFailedPanel();
+                if(!this.levelWon) {
+                    this.showFailedPanel();
+                }
                 break;
             }
 
@@ -455,6 +458,8 @@ export class Level1 extends Level
 
         // Play the washer running animation
         washer.play(`washer-running-${this.selectedWasherPosition.x}-${this.selectedWasherPosition.y}`);
+        this.scene.get(SceneNames.SoundScene).playMachineSound();
+        this.scene.get(SceneNames.SoundScene).playWaterSplash();
 
         // Optional: Add a slight shake effect for more dynamism
         this.tweens.add({
@@ -470,6 +475,7 @@ export class Level1 extends Level
     private animateSortingStation(): void {
         if (!this.sortingStationSprite) return;
 
+        this.scene.get(SceneNames.SoundScene).playPhysicalTask();
         this.sortingStationSprite.play('cloth-sorting-station');
     }
 
@@ -495,6 +501,8 @@ export class Level1 extends Level
         const allActionsCompleted = requiredActions.every(action => this.completedActions.has(action));
 
         if (allActionsCompleted && atStartPosition) {
+            const moveIdx = zoneIdToActionIndex['finish'];
+            if (moveIdx !== undefined) this.levelInfoScene?.markActionComplete(moveIdx);
             this.levelWon();
         }
     }
@@ -503,7 +511,9 @@ export class Level1 extends Level
      * Handle level win
      */
     private levelWon(): void {
+        this.levelWon = true;
         this.levelInfoScene?.stopTimer();
+        this.scene.get(SceneNames.SoundScene).playLevelWin();
 
         const elapsedMs = this.levelInfoScene?.getElapsedMs() ?? 0;
         const totalSeconds = Math.floor(elapsedMs / 1000);

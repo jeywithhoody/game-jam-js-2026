@@ -23,6 +23,14 @@ export class SoundScene extends Scene {
         this.load.setPath('assets');
         this.load.audio('music_theme', 'suno_ai_moots_cardbot_drift.mp3');
         this.load.audio('robot_sound', 'robot_move.flac');
+        this.load.audio('robot_move', 'robotmoveshort.flac');
+        this.load.audio('machine_sound', 'washingmachineshort.flac');
+        this.load.audio('water_splash', 'watersplash.flac');
+        this.load.audio('physical_task', 'physicaltasks.flac');
+        this.load.audio('level_win', 'levelwin.flac');
+        this.load.audio('card_take', 'cardtake.flac');
+        this.load.audio('button_click', 'buttonclick.flac');
+        this.load.audio('fail', 'fail.flac');
     }
 
     create() {
@@ -61,6 +69,38 @@ export class SoundScene extends Scene {
 
     setSfxVolume(volume: number) {
         this.setSoundGain({ sfx: volume });
+    }
+
+    playRobotMovement() {
+        this.playSound('robot_move');
+    }
+
+    playMachineSound() {
+        this.playSound('machine_sound');
+    }
+
+    playWaterSplash() {
+        this.playSound('water_splash');
+    }
+
+    playPhysicalTask() {
+        this.playSound('physical_task');
+    }
+
+    playLevelWin() {
+        this.playSound('level_win');
+    }
+
+    playCardTake() {
+        this.playSound('card_take');
+    }
+
+    playButtonClick() {
+        this.playSound('button_click');
+    }
+
+    playFail() {
+        this.playSound('fail');
     }
 
     playRobotSound() {

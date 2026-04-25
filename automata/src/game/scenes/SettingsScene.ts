@@ -130,7 +130,10 @@ export class SettingsScene extends Scene {
 
         btn.on('pointerover', () => btn.setColor('#ffffff'));
         btn.on('pointerout', () => btn.setColor('#aaaaaa'));
-        btn.on('pointerdown', () => callback());
+        btn.on('pointerdown', () => {
+            this.scene.get(SceneNames.SoundScene).playButtonClick();
+            callback();
+        });
 
         return btn;
     }

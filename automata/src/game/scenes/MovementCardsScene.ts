@@ -1,4 +1,5 @@
 import { Scene, GameObjects, Geom, Input } from 'phaser';
+import SceneNames from './SceneName';
 
 //TODO : add posssibility to reshuffle cards
 //TODO : create a card dictionary (have particular number that adapts to level)
@@ -218,6 +219,7 @@ export class MovementCardsScene {
         });
 
         btnBg.on('pointerdown', () => {
+            this.scene.scene.get(SceneNames.SoundScene).playButtonClick();
             this.executeCardSequence();
         });
 
@@ -239,6 +241,7 @@ export class MovementCardsScene {
     }
 
     addCardToHand(type: CardType, speed: CardSpeed) {
+        this.scene.scene.get(SceneNames.SoundScene).playCardTake();
         this.handCards.push({ type, speed });
         this.renderHand();
     }

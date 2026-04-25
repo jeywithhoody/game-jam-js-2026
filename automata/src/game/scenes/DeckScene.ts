@@ -8,6 +8,7 @@ export class DeckScene {
     private deckContainer: GameObjects.Container;
     /** Cards loaded from a level-specific deck (shuffled). When set, these are the source of truth. */
     private cards: DrawnCard[] = [];
+    private initialCards: DrawnCard[] = [];
     /** Fallback count used when no card data is provided (legacy / random-deck mode). */
     private fallbackCount: number = 30;
     private cardBackImage: string = 'card-back';
@@ -24,6 +25,7 @@ export class DeckScene {
      */
     public setCards(cards: DrawnCard[]): void {
         this.cards = [...cards];
+        this.initialCards = [...cards];
         this.fallbackCount = 0;
         this.shuffle();
         this.refreshDeckDisplay();
@@ -70,34 +72,7 @@ export class DeckScene {
     }
 
     private createCardPile() {
-        // Create stacked card effect with slight offset
-        const stackOffset = 4; // Offset between cards for depth
-
-        // Display only the top few cards for visual effect
-        const visibleCards = Math.min(5, this.totalCount);
-
-        for (let i = 0; i < visibleCards; i++) {
-            const offsetX = i * stackOffset -315;
-            const offsetY = i * stackOffset -360;
-            
-            const card = this.scene.add.sprite(offsetX, offsetY, this.cardBackImage);
-            card.setOrigin(0, 0); // Origin at bottom-left
-            // Crop to show only the card (from the 1920x1080 image, similar to MovementCardsScene)
-            card.setCrop(170, 10, 240, 400);
-            //card.setDisplaySize(1920, 1080);
-            card.setDepth(i); // Layer cards on top of each other
-            card.setScale(1.5); // Scale down for better fit
-            
-            // Make the top card interactive
-            if (i === visibleCards - 1) {
-                // Set interactive zone to match the crop dimensions (240x400)
-                const hitArea = new Geom.Rectangle(170, 10, 240, 400);
-                card.setInteractive(hitArea, Geom.Rectangle.Contains);
-                card.on('pointerdown', () => this.handleCardClick());
-            }
-            
-            this.deckContainer.add(card);
-        }
+        this.fillCardPile();
 
         // Add text showing card count
         const countText = this.scene.add.text(75, -15, `${this.totalCount}`, {
@@ -107,6 +82,45 @@ export class DeckScene {
         });
         countText.setOrigin(0.5, 0.5);
         this.deckContainer.add(countText);
+    }
+
+    public resetCardPile() {
+        this.cards = [...this.initialCards];
+        this.fillCardPile();
+        this.fallbackCount = 0;
+        this.shuffle();
+        this.refreshDeckDisplay();
+    }
+
+    private fillCardPile() {
+        // Create stacked card effect with slight offset
+        const stackOffset = 4; // Offset between cards for depth
+
+        // Display only the top few cards for visual effect
+        const visibleCards = Math.min(5, this.totalCount);
+
+        for (let i = 0; i < visibleCards; i++) {
+            const offsetX = i * stackOffset -315;
+            const offsetY = i * stackOffset -360;
+
+            const card = this.scene.add.sprite(offsetX, offsetY, this.cardBackImage);
+            card.setOrigin(0, 0); // Origin at bottom-left
+            // Crop to show only the card (from the 1920x1080 image, similar to MovementCardsScene)
+            card.setCrop(170, 10, 240, 400);
+            //card.setDisplaySize(1920, 1080);
+            card.setDepth(i); // Layer cards on top of each other
+            card.setScale(1.5); // Scale down for better fit
+
+            // Make the top card interactive
+            if (i === visibleCards - 1) {
+                // Set interactive zone to match the crop dimensions (240x400)
+                const hitArea = new Geom.Rectangle(170, 10, 240, 400);
+                card.setInteractive(hitArea, Geom.Rectangle.Contains);
+                card.on('pointerdown', () => this.handleCardClick());
+            }
+
+            this.deckContainer.add(card);
+        }
     }
 
     /**

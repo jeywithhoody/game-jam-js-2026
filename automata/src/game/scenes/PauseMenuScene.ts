@@ -122,6 +122,7 @@ export class PauseMenuScene extends Scene {
         });
 
         bg.on('pointerdown', () => {
+            this.scene.get(SceneNames.SoundScene).playButtonClick();
             callback();
         });
 

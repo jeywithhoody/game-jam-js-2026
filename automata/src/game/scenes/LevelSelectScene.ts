@@ -81,6 +81,7 @@ export class LevelSelectScene extends Scene {
         });
 
         button.on('pointerup', () => {
+            this.scene.get(SceneNames.SoundScene).playButtonClick();
             this.scene.start(level.sceneName);
         });
     }

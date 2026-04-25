@@ -25,6 +25,7 @@ export class Level extends Scene
     protected actionZoneSystem: ActionZoneSystem = null;
     protected startX: number = 0;
     protected startY: number = 0;
+    protected levelWon: boolean = false;
 
     constructor(levelName: string)
     {
@@ -102,6 +103,14 @@ export class Level extends Scene
             this.deckScene.addCard(card);
             this.levelInfoScene?.addPenaltySeconds(10);
         });
+    }
+
+    update(time: number, delta: number)
+    {
+        super.update(time, delta);
+        if(this.deckScene.getCardCount() <= 0 && this.cardScene.getHand().length <= 0) {
+            this.deckScene.resetCardPile();
+        }
     }
 
     /**
@@ -219,7 +228,7 @@ export class Level extends Scene
 
         // Animate robot
         this.animateRobotMovement(direction);
-        this.scene.get(SceneNames.SoundScene).playRobotSound();
+        this.scene.get(SceneNames.SoundScene).playRobotMovement();
 
         return true;
     }
