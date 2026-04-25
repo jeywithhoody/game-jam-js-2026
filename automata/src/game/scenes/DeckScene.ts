@@ -89,7 +89,6 @@ export class DeckScene {
         this.fillCardPile();
         this.fallbackCount = 0;
         this.shuffle();
-        this.refreshDeckDisplay();
     }
 
     private fillCardPile() {
