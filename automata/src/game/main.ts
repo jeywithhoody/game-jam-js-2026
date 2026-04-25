@@ -6,6 +6,7 @@ import { LevelSelectScene } from './scenes/LevelSelectScene';
 import { LevelInfoScene } from './scenes/LevelInfoScene';
 import { PauseMenuScene } from './scenes/PauseMenuScene';
 import { SoundScene } from './scenes/SoundScene';
+import { SettingsScene } from './scenes/SettingsScene';
 import { AUTO, Game, Scale,Types } from 'phaser';
 
 // Find out more information about the Game Config at:
@@ -28,8 +29,9 @@ const config: Types.Core.GameConfig = {
         Level1,
         LevelInfoScene,
         PauseMenuScene,
-        SoundScene
-    ]
+        SoundScene,
+        SettingsScene
+    ],
 };
 
 const StartGame = (parent: string) => {

@@ -179,14 +179,14 @@ export class MovementCardsScene {
         this.goButton.setDepth(150);
 
         // Button background
-        const btnBg = this.scene.add.rectangle(0, 0, 120, 80, 0x00aa00, 0.8);
-        btnBg.setStrokeStyle(3, 0x00ff00);
+        const btnBg = this.scene.add.rectangle(0, 0, 120, 80, 0x037a00, 1);
+        btnBg.setStrokeStyle(2, 0xaaaaaa);
         this.goButton.add(btnBg);
 
         // Button text
         const btnText = this.scene.add.text(0, -10, 'GO', {
             fontSize: '28px',
-            color: '#000000',
+            color: '#ffffff',
             fontFamily: 'Arial',
             fontStyle: 'bold'
         });
@@ -196,7 +196,7 @@ export class MovementCardsScene {
         // Card count indicator
         const countText = this.scene.add.text(0, 20, '0 cards', {
             fontSize: '12px',
-            color: '#000000',
+            color: '#ffffff',
             fontFamily: 'Arial'
         });
         countText.setOrigin(0.5);
@@ -206,15 +206,15 @@ export class MovementCardsScene {
         btnBg.setInteractive({ useHandCursor: true });
         
         btnBg.on('pointerover', () => {
-            btnBg.setFillStyle(0x00ff00, 0.9);
+            btnBg.setFillStyle(0x025c00);
             btnText.setColor('#ffffff');
             countText.setColor('#ffffff');
         });
 
         btnBg.on('pointerout', () => {
-            btnBg.setFillStyle(0x00aa00, 0.8);
-            btnText.setColor('#000000');
-            countText.setColor('#000000');
+            btnBg.setFillStyle(0x037a00);
+            btnText.setColor('#ffffff');
+            countText.setColor('#ffffff');
         });
 
         btnBg.on('pointerdown', () => {

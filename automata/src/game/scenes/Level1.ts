@@ -178,7 +178,7 @@ export class Level1 extends Level
             x: 2, y: 0,
             actionType: 'put',
             itemType: 'Clothes',
-            name: 'Washing Machine (Put)'
+            name: 'Washing Machine (Drop)'
         });
 
         this.actionZoneSystem.addZone('washer-take', {
@@ -193,7 +193,7 @@ export class Level1 extends Level
             x: 3, y: 1,
             actionType: 'put',
             itemType: 'Washed Clothes',
-            name: 'Dryer (Put)'
+            name: 'Dryer (Drop)'
         });
 
         this.actionZoneSystem.addZone('dryer-take', {

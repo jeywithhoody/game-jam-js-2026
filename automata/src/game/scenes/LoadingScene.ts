@@ -20,6 +20,23 @@ export class LoadingScene extends Scene {
         const barX = (W - this.BAR_W) / 2;
         const barY = H * 0.72;
 
+        this.load.image('robot-profil0000', 'robot-profil0000.png');
+        this.load.image('robot-profil0003', 'robot-profil0003.png');
+        this.load.image('robot-profil0006', 'robot-profil0006.png');
+        this.load.image('robot-profil0009', 'robot-profil0009.png');
+
+        this.anims.create({
+            key: 'loading-robot-walk',
+            frames: [
+                { key: 'robot-profil0000' },
+                { key: 'robot-profil0003' },
+                { key: 'robot-profil0006' },
+                { key: 'robot-profil0009' },
+            ],
+            frameRate: 8,
+            repeat: -1,
+        });
+
         // ── Background ────────────────────────────────────────────────────
         const bg = this.add.rectangle(W / 2, H / 2, W, H, 0x0d0d1a);
         bg.setOrigin(0.5, 0.5);
@@ -50,7 +67,7 @@ export class LoadingScene extends Scene {
         // ── Robot sprite (walks along the bar) ───────────────────────────
         this.robot = this.add.sprite(barX, barY, 'robot-profil0000');
         this.robot.setCrop(40, 40, 149, 205);
-        this.robot.setScale(0.55);
+        this.robot.setScale(1);
         this.robot.setDepth(10);
         // The robot texture may not be cached yet on first frame; Phaser will
         // swap to the real texture automatically once loaded.
@@ -62,6 +79,10 @@ export class LoadingScene extends Scene {
         this.load.image('game-start',   'game-start.png');
         this.load.image('play-btn',     'play-btn.png');
         this.load.image('credits-btn',  'credits-btn.png');
+
+        // UI elements
+        this.load.image('controls',     'controls.png');
+        this.load.image('settings-btn',  'settings-btn.png');
 
         // Backgrounds
         this.load.image('background',   'background.png');
