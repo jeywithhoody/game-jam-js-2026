@@ -243,18 +243,29 @@ export class MovementCardsScene {
     addCardToHand(type: CardType, speed: CardSpeed) {
         this.scene.scene.get(SceneNames.SoundScene).playCardTake();
         this.handCards.push({ type, speed });
-        this.renderHand();
+        if(this.tempCardOrder) {
+            this.tempCardOrder.push({ type, speed });
+            this.renderHandWithSelection();
+        } else {
+            this.renderHand();
+        }
     }
 
     removeCardFromHand(index: number) {
         if (index >= 0 && index < this.handCards.length) {
             this.handCards.splice(index, 1);
-            this.renderHand();
+            if(this.tempCardOrder) {
+                this.tempCardOrder.splice(index, 1);
+                this.renderHandWithSelection();
+            } else {
+                this.renderHand();
+            }
         }
     }
 
     clearHand() {
         this.handCards = [];
+        this.tempCardOrder = [];
         this.renderHand();
     }
 
@@ -269,7 +280,7 @@ export class MovementCardsScene {
     }
 
     private renderHandWithSelection() {
-        if (this.tempCardOrder) {
+        if(this.tempCardOrder) {
             this.renderHandInternal(this.tempCardOrder, this.selectedCardIndex);
         }
     }
@@ -306,78 +317,11 @@ export class MovementCardsScene {
 
         if (cards.length === 0) return;
 
-        // Calculate total width needed
-        const totalWidth = (this.handCards.length - 1) * this.cardSpacing;
-        const startX = -this.cardSpacing - 30;
-
         // Update card count on button
         const goButtonChild = this.goButton.getAll('type', 'Text')[1] as GameObjects.Text;
         if (goButtonChild) {
-            goButtonChild.setText(`${this.handCards.length} card${this.handCards.length !== 1 ? 's' : ''}`);
+            goButtonChild.setText(`${cards.length} card${cards.length !== 1 ? 's' : ''}`);
         }
-
-        // Add cards to container
-        this.handCards.forEach((card, index) => {
-            const imageKey = `card-${card.type}-${card.speed}.png`;
-            const sprite = this.scene.add.sprite(startX + index * this.cardSpacing, 0, imageKey);
-            sprite.setOrigin(0, 0);
-            sprite.setCrop(170, 10, 240, 400);
-            sprite.setScale(1.1);
-            sprite.setDepth(index + 1);
-            
-            // Store card data for later
-            (sprite as any).cardIndex = index;
-            (sprite as any).cardData = card;
-            
-            // Make card interactive and draggable
-            sprite.setInteractive({ useHandCursor: true });
-            this.scene.input.setDraggable(sprite, true);
-            
-            // Pointer down - track start of drag or single click
-            sprite.on('pointerdown', (pointer: Input.Pointer) => {
-                if (!this.draggedCard) {
-                    this.draggedCard = {
-                        index: index,
-                        originalX: sprite.x,
-                        sprite: sprite,
-                        startX: pointer.x
-                    };
-                    sprite.setAlpha(0.7);
-                    sprite.setDepth(1000); // Bring to front while dragging
-                }
-            });
-
-            // Drag handler - update position
-            this.scene.input.on('drag', (pointer: Input.Pointer, gameObject: any) => {
-                if (gameObject === sprite && this.draggedCard) {
-                    const deltaX = pointer.x - this.draggedCard.startX;
-                    sprite.x = this.draggedCard.originalX + deltaX;
-                }
-            });
-
-            // Drag end - reorder if needed
-            this.scene.input.on('dragend', (pointer: Input.Pointer, gameObject: any) => {
-                if (gameObject === sprite && this.draggedCard) {
-                    const newIndex = this.calculateNewCardIndex(sprite);
-                    if (newIndex !== this.draggedCard.index && newIndex >= 0 && newIndex < this.handCards.length) {
-                        this.reorderCards(this.draggedCard.index, newIndex);
-                    }
-                    this.draggedCard = null;
-                    this.renderHand();
-                }
-            });
-
-            // Single click to play card
-            sprite.on('pointerup', (pointer: Input.Pointer) => {
-                // Only trigger if we didn't drag far
-                if (this.draggedCard === null && Math.abs(pointer.x - (pointer.prevPosition?.x ?? pointer.x)) < 10) {
-                    this.onCardClicked(card, index);
-                }
-            });
-            
-            this.movementCardsContainer.add(sprite);
-            this.cardSprites.push(sprite);
-        });
 
         // Get crop zone from the first card to calculate average dimensions
         const firstCardType = cards[0].type;
@@ -466,7 +410,7 @@ export class MovementCardsScene {
                     // sprite.setTint(0x00ff00); // Green tint when selected
                     sprite.setTint(0xe8f0ff);
                 }
-                
+
                 // Add hover effects
                 sprite.on('pointerover', () => {
                     if (this.selectedCardIndex !== currentCardIndex) {
@@ -484,7 +428,7 @@ export class MovementCardsScene {
                     }
                 });
                 
-                // Card selection on click
+                // Card selection on click (pointerup)
                 sprite.on('pointerup', () => {
                     sprite.clearTint();
                     if (this.selectedCardIndex === null) {
@@ -553,13 +497,6 @@ export class MovementCardsScene {
 
         if (this.sequenceCallback) {
             await this.sequenceCallback([...this.handCards]);
-        }
-    }
-
-    private onCardClicked(card: { type: CardType; speed: CardSpeed }, index: number): void {
-        // Call the registered callback if set
-        if (this.cardPlayCallback) {
-            this.cardPlayCallback(card.type, card.speed, index);
         }
     }
 
