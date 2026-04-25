@@ -67,5 +67,5 @@ export const Level2Metadata: LevelMetadata = {
         { location: "Sink", action: "take", item: "Dirty Dishes", position: { x: 2, y: 6 } },
         { location: "End Position", action: "finish", item: "Finished", position: { x: 1, y: 3 } }
     ],
-    startPosition: { x: 1, y: 3 }
+    startPosition: { x: 0, y: 2 }
 };
