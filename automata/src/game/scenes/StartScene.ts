@@ -87,6 +87,7 @@ export class StartScene extends Scene {
                 useHandCursor: true,
             }
         });
+       this.buttons.push(playBtn);
 
         // Settings button
         const settingsBtn = this.add.image(W / 2, H * 0.55, 'settings-btn')
