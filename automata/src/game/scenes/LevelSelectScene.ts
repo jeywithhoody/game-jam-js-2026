@@ -126,6 +126,7 @@ export class LevelSelectScene extends Scene {
         closeBtn.on('pointerout', () => closeBtn.setColor('#aaaaaa'));
         closeBtn.on('pointerdown', () => {
             this.scene.get(SceneNames.SoundScene).playButtonClick();
+            (this.scene.get(SceneNames.Start) as any).enableButtons();
             this.scene.stop();
         });
         container.add(closeBtn);
