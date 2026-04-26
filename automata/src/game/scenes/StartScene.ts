@@ -4,6 +4,7 @@ import SceneNames from './SceneName';
 export class StartScene extends Scene {
     private robot: GameObjects.Sprite;
     private creditsOverlay: GameObjects.Container;
+    private buttons: GameObjects.Image[] = [];
 
     constructor() {
         super(SceneNames.Start);
@@ -24,6 +25,15 @@ export class StartScene extends Scene {
     create() {
         const W = this.scale.width;
         const H = this.scale.height;
+
+        this.events.on("shutdown", () => {
+          this.buttons.forEach((btn) => {
+            btn.off("pointerover");
+            btn.off("pointerout");
+            btn.off("pointerdown");
+          });
+          this.buttons = [];
+        });
 
         // Background
         this.add.image(0, 0, 'game-start')
@@ -63,8 +73,10 @@ export class StartScene extends Scene {
         playBtn.on('pointerout', () => playBtn.setAlpha(1));
         playBtn.on('pointerdown', () => {
             this.scene.get(SceneNames.SoundScene).playButtonClick();
+            this.buttons.forEach((btn) => btn.disableInteractive());
             this.scene.launch(SceneNames.LevelSelect, { isOverlay: true });
         });
+       this.buttons.push(playBtn);
 
         // Settings button
         const settingsBtn = this.add.image(W / 2, H * 0.55, 'settings-btn')
@@ -81,6 +93,7 @@ export class StartScene extends Scene {
             this.scene.get(SceneNames.SoundScene).playButtonClick();
             this.scene.launch(SceneNames.Settings, { previousScene: SceneNames.Start });
         });
+        this.buttons.push(settingsBtn);
 
         // Credits button
         const creditsBtn = this.add.image(W / 2, H * 0.55, 'credits-btn')
@@ -97,6 +110,7 @@ export class StartScene extends Scene {
             this.scene.get(SceneNames.SoundScene).playButtonClick();
             this.showCreditsOverlay();
         });
+        this.buttons.push(creditsBtn);
 
         // Credits overlay (hidden by default)
         this.creditsOverlay = this.buildCreditsOverlay();
