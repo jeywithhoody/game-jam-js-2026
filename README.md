@@ -1,12 +1,12 @@
-# Robomata
+# Automata
 
 A puzzle game created for the **Gamedev.js Jam 2026** where you program a robot to manage laundry tasks using a card-based action system.
 
-![Robomata Menu](./homescreenshot.png)
+![Automata Menu](./homescreenshot.png)
 
 ## About the Game
 
-In Robomata, you help a robot manage laundry by creating sequences of actions using command cards. Pick up dirty clothes, sort them, wash them in the machine, dry them, fold them, and return them to the starting position—all against the clock!
+In Automata, you help a robot manage laundry by creating sequences of actions using command cards. Pick up dirty clothes, sort them, wash them in the machine, dry them, fold them, and return them to the starting position—all against the clock!
 
 ### Level 1: Lavomata
 
@@ -43,7 +43,7 @@ The second level shifts to restaurant management where you control a cooking rob
 
 ## Play the Game
 
-🎮 **Play on itch.io**: [Robomata on itch.io](https://demomaker.itch.io/robomata)
+🎮 **Play on itch.io**: [Automata on itch.io](https://demomaker.itch.io/automata)
 
 ## Credits
 
