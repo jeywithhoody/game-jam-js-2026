@@ -1,6 +1,7 @@
 import { LoadingScene } from './scenes/LoadingScene';
 import { StartScene } from './scenes/StartScene';
 import { Level1 } from './scenes/Level1';
+import { Level2 } from './scenes/Level2';
 import { LevelSelectScene } from './scenes/LevelSelectScene';
 import { LevelInfoScene } from './scenes/LevelInfoScene';
 import { PauseMenuScene } from './scenes/PauseMenuScene';
@@ -25,6 +26,7 @@ const config: Types.Core.GameConfig = {
         StartScene,
         LevelSelectScene,
         Level1,
+        Level2,
         LevelInfoScene,
         PauseMenuScene,
         SettingsScene,
