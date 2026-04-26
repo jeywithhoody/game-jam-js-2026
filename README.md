@@ -48,12 +48,13 @@ The second level shifts to restaurant management where you control a cooking rob
 ## Credits
 
 **Created by:**
-- [Demomaker](https://demomaker.itch.io/)
-- [Jeywithoody](https://github.com/jeywithhoody)
+- [Demomaker](https://github.com/demomaker) ([itch.io](https://demomaker.itch.io/))
+- [Jeywithoody](https://github.com/jeywithhoody) ([itch.io](https://jeywithhoody.itch.io/))
 
 **Graphics**: Krita and Inkscape  
 **Programming**: VSCode + GitHub Copilot, Kate  
 **Music**: Suno  
+**Sounds**: Demomaker (using his wonderful voice)
 
 ## License
 
