@@ -39,3 +39,33 @@ export const Level1Metadata: LevelMetadata = {
     ],
     startPosition: { x: 0, y: 1 }
 };
+
+export const Level2Metadata: LevelMetadata = {
+    levelNumber: 2,
+    levelName: "Restomata",
+    description: "Help the robot manage a restaurant kitchen and serve customers",
+    objectives: [
+        "Get ingredients from storage",
+        "Prepare ingredients at prep station",
+        "Cook food on the stove",
+        "Plate the meal",
+        "Serve to customer",
+        "Dispose waste in trash",
+        "Wash dirty dishes",
+        "Return to starting position"
+    ],
+    actions: [
+        { location: "Ingredient Storage", action: "take", item: "Raw Ingredients", position: { x: 2, y: 1 } },
+        { location: "Prep Station", action: "put", item: "Ingredients", position: { x: 3, y: 2 } },
+        { location: "Prep Station", action: "take", item: "Prepared Ingredients", position: { x: 3, y: 2 } },
+        { location: "Stove", action: "put", item: "Ingredients", position: { x: 4, y: 3 } },
+        { location: "Stove", action: "take", item: "Cooked Food", position: { x: 4, y: 3 } },
+        { location: "Plate Station", action: "put", item: "Food", position: { x: 3, y: 4 } },
+        { location: "Plate Station", action: "take", item: "Plated Meal", position: { x: 3, y: 4 } },
+        { location: "Serving Counter", action: "put", item: "Meal", position: { x: 2, y: 5 } },
+        { location: "Trash Zone", action: "put", item: "Waste", position: { x: 4, y: 5 } },
+        { location: "Sink", action: "take", item: "Dirty Dishes", position: { x: 2, y: 6 } },
+        { location: "End Position", action: "finish", item: "Finished", position: { x: 1, y: 3 } }
+    ],
+    startPosition: { x: 0, y: 2 }
+};

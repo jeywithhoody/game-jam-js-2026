@@ -8,7 +8,7 @@ A puzzle game created for the **Gamedev.js Jam 2026** where you program a robot 
 
 In Robomata, you help a robot manage laundry by creating sequences of actions using command cards. Pick up dirty clothes, sort them, wash them in the machine, dry them, fold them, and return them to the starting position—all against the clock!
 
-### Level 1: Laundromata
+### Level 1: Lavomata
 
 The first level tasks you with managing the robot's laundry workflow:
 - Pick up clothes from the pile
@@ -19,6 +19,18 @@ The first level tasks you with managing the robot's laundry workflow:
 - Return to starting position
 
 ![Level 1 Gameplay](./level1.png)
+
+### Level 2: Restomata
+
+The second level shifts to restaurant management where you control a cooking robot:
+- Gather raw ingredients from storage
+- Prepare ingredients at the prep station
+- Cook food on the stove
+- Plate meals at the plating station
+- Serve completed meals to customers
+- Manage waste and wash dirty dishes
+
+![Level 2 Gameplay](./level2.png)
 
 ## Technologies Used
 
@@ -36,12 +48,13 @@ The first level tasks you with managing the robot's laundry workflow:
 ## Credits
 
 **Created by:**
-- [Demomaker](https://demomaker.itch.io/)
-- [Jeywithoody](https://github.com/jeywithhoody)
+- [Demomaker](https://github.com/demomaker) ([itch.io](https://demomaker.itch.io/))
+- [Jeywithoody](https://github.com/jeywithhoody) ([itch.io](https://jeywithhoody.itch.io/))
 
 **Graphics**: Krita and Inkscape  
 **Programming**: VSCode + GitHub Copilot, Kate  
 **Music**: Suno  
+**Sounds**: Demomaker (using his wonderful voice)
 
 ## License
 
