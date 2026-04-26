@@ -5,6 +5,7 @@ export class StartScene extends Scene {
     private robot: GameObjects.Sprite;
     private creditsOverlay: GameObjects.Container;
     private buttons: GameObjects.Image[] = [];
+    private buttonConfigs: Array<{ btn: GameObjects.Image; config: any }> = [];
 
     constructor() {
         super(SceneNames.Start);
@@ -33,6 +34,7 @@ export class StartScene extends Scene {
             btn.off("pointerdown");
           });
           this.buttons = [];
+          this.buttonConfigs = [];
         });
 
         // Background
@@ -76,7 +78,15 @@ export class StartScene extends Scene {
             this.buttons.forEach((btn) => btn.disableInteractive());
             this.scene.launch(SceneNames.LevelSelect, { isOverlay: true });
         });
-       this.buttons.push(playBtn);
+        this.buttons.push(playBtn);
+        this.buttonConfigs.push({
+            btn: playBtn,
+            config: {
+                hitArea: new Geom.Rectangle(W / 2 - 407 / 2, H * 0.55 + 110 / 2 , 407, 110),
+                hitAreaCallback: Geom.Rectangle.Contains,
+                useHandCursor: true,
+            }
+        });
 
         // Settings button
         const settingsBtn = this.add.image(W / 2, H * 0.55, 'settings-btn')
@@ -94,6 +104,14 @@ export class StartScene extends Scene {
             this.scene.launch(SceneNames.Settings, { previousScene: SceneNames.Start });
         });
         this.buttons.push(settingsBtn);
+        this.buttonConfigs.push({
+            btn: settingsBtn,
+            config: {
+                hitArea: new Geom.Rectangle(W / 2 - 407 / 2, H * 0.65 + 120 / 2, 407, 120),
+                hitAreaCallback: Geom.Rectangle.Contains,
+                useHandCursor: true,
+            }
+        });
 
         // Credits button
         const creditsBtn = this.add.image(W / 2, H * 0.55, 'credits-btn')
@@ -111,6 +129,14 @@ export class StartScene extends Scene {
             this.showCreditsOverlay();
         });
         this.buttons.push(creditsBtn);
+        this.buttonConfigs.push({
+            btn: creditsBtn,
+            config: {
+                hitArea: new Geom.Rectangle(W / 2 - 407 / 2, H * 0.75 + 120 / 2 , 407, 120),
+                hitAreaCallback: Geom.Rectangle.Contains,
+                useHandCursor: true,
+            }
+        });
 
         // Credits overlay (hidden by default)
         this.creditsOverlay = this.buildCreditsOverlay();
@@ -173,5 +199,11 @@ export class StartScene extends Scene {
 
     private showCreditsOverlay(): void {
         this.creditsOverlay.setVisible(true);
+    }
+
+    public enableButtons(): void {
+        this.buttonConfigs.forEach(({ btn, config }) => {
+            btn.setInteractive(config);
+        });
     }
 }
