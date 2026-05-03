@@ -1,5 +1,6 @@
 import { Scene, GameObjects, Geom, Input } from 'phaser';
 import SceneNames from './SceneName';
+import {CardInfo} from "../types.ts";
 
 //TODO : add posssibility to reshuffle cards
 //TODO : create a card dictionary (have particular number that adapts to level)
@@ -22,7 +23,7 @@ function getCardName(type: CardType, speed: CardSpeed) {
     return `card-${type}-${speed}.png`
 }
 
-interface CardInfo {
+interface CardImgDetail {
     path: string;
     cropZone: CropZone;
 }
@@ -34,7 +35,7 @@ interface CropZone {
     h: number;
 }
 
-export const Cards: Record<CardType, Record<CardSpeed, CardInfo>> = {
+export const Cards: Record<CardType, Record<CardSpeed, CardImgDetail>> = {
     'move-down': {
         '1': { path: getCardName(CardType.MoveDown, 1), cropZone: { x: 940, y: 40, w: 167, h: 228 } },
         '2': { path: getCardName(CardType.MoveDown, 2), cropZone: { x: 760, y: 40, w: 167, h: 228 }  },
@@ -62,12 +63,12 @@ export const Cards: Record<CardType, Record<CardSpeed, CardInfo>> = {
 }
 
 type CardPlayCallback = (cardType: CardType, cardSpeed: CardSpeed, cardIndex: number) => void;
-type CardSequenceCallback = (cards: Array<{ type: CardType; speed: CardSpeed }>) => Promise<void>;
+type CardSequenceCallback = (cards: CardInfo[]) => Promise<void>;
 
 export class MovementCardsScene {
 
     public movementCardsContainer: GameObjects.Container;
-    private handCards: Array<{ type: CardType; speed: CardSpeed }> = [];
+    private handCards: CardInfo[] = [];
     private cardSprites: GameObjects.Sprite[] = [];
     private cardSpacing: number = 200;
     private cardPlayCallback: CardPlayCallback | null = null;
@@ -77,9 +78,9 @@ export class MovementCardsScene {
     private scene: Scene;
     private containerWidth: number = 1255; // Width of the movement cards area
     private selectedCardIndex: number | null = null;
-    private tempCardOrder: Array<{ type: CardType; speed: CardSpeed }> | null = null;
+    private tempCardOrder: CardInfo[] | null = null;
     private cardPositions: Array<{ x: number; y: number; index: number }> = [];
-    private onCardReturnedToDeck: ((card: { type: CardType; speed: CardSpeed }) => void) | null = null;
+    private onCardReturnedToDeck: ((card: CardInfo) => void) | null = null;
     private failedPanel: GameObjects.Image | null = null;
   
     constructor(scene: Scene) {
@@ -168,7 +169,7 @@ export class MovementCardsScene {
     /**
      * Set callback when a card is returned to the deck
      */
-    public setOnCardReturnedToDeck(callback: (card: { type: CardType; speed: CardSpeed }) => void) {
+    public setOnCardReturnedToDeck(callback: (card: CardInfo) => void) {
         this.onCardReturnedToDeck = callback;
     }
 
@@ -242,9 +243,9 @@ export class MovementCardsScene {
 
     addCardToHand(type: CardType, speed: CardSpeed) {
         this.scene.scene.get(SceneNames.SoundScene).playCardTake();
-        this.handCards.push({ type, speed });
+        this.handCards.push({ cardType: type, speed });
         if(this.tempCardOrder) {
-            this.tempCardOrder.push({ type, speed });
+            this.tempCardOrder.push({ cardType: type, speed });
             this.renderHandWithSelection();
         } else {
             this.renderHand();
@@ -269,7 +270,7 @@ export class MovementCardsScene {
         this.renderHand();
     }
 
-    setHand(cards: Array<{ type: CardType; speed: CardSpeed }>) {
+    setHand(cards: CardInfo[]) {
         this.handCards = [...cards];
         this.renderHand();
     }
@@ -309,7 +310,7 @@ export class MovementCardsScene {
         }
     }
 
-    private renderHandInternal(cards: { type: CardType; speed: CardSpeed }[], selectedIndex: number | null) {
+    private renderHandInternal(cards: CardInfo[], selectedIndex: number | null) {
         // Remove old card sprites
         this.cardSprites.forEach(sprite => sprite.destroy());
         this.cardSprites = [];
@@ -324,7 +325,7 @@ export class MovementCardsScene {
         }
 
         // Get crop zone from the first card to calculate average dimensions
-        const firstCardType = cards[0].type;
+        const firstCardType = cards[0].cardType;
         const firstCardSpeed = cards[0].speed;
         const firstCropZone = Cards[firstCardType][firstCardSpeed].cropZone;
         
@@ -383,7 +384,7 @@ export class MovementCardsScene {
                 const card = cards[cardIndex];
                 const currentCardIndex = cardIndex; // Capture current index for callbacks
                 console.log('Card index:', cardIndex, 'Card:', card);
-                const cropZone = Cards[card.type][card.speed].cropZone;
+                const cropZone = Cards[card.cardType][card.speed].cropZone;
                 const xPos = startX + i * (scaledCardWidth + scaledSpacing);
                 
                 
@@ -503,7 +504,7 @@ export class MovementCardsScene {
     /**
      * Get the hand cards
      */
-    public getHand(): Array<{ type: CardType; speed: CardSpeed }> {
+    public getHand(): CardInfo[] {
         return this.handCards;
     }
 }

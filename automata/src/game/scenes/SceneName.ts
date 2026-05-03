@@ -8,5 +8,6 @@ const LevelInfo = "LevelInfo";
 const PauseMenu = "PauseMenu";
 const SoundScene = "SoundScene";
 const Settings = "Settings";
+const Introduction = "Introduction";
 
-export default { Game, Loading, Start, Level1, Level2, LevelSelect, LevelInfo, PauseMenu, SoundScene, Settings }
+export default { Game, Loading, Start, Level1, Level2, LevelSelect, LevelInfo, PauseMenu, SoundScene, Settings, Introduction }

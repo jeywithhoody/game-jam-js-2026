@@ -136,6 +136,16 @@ export class LoadingScene extends Scene {
         this.load.image('cloth-sorting0048',  'cloth-sorting0048.png');
         this.load.image('cloth-sorting0052',  'cloth-sorting0052.png');
         this.load.image('cloth-sorting0059',  'cloth-sorting0059.png');
+        this.load.audio('music_theme', 'suno_ai_moots_cardbot_drift.mp3');
+        this.load.audio('robot_sound', 'robot_move.flac');
+        this.load.audio('robot_move', 'robotmoveshort.flac');
+        this.load.audio('machine_sound', 'washingmachineshort.flac');
+        this.load.audio('water_splash', 'watersplash.flac');
+        this.load.audio('physical_task', 'physicaltasks.flac');
+        this.load.audio('level_win', 'levelwin.flac');
+        this.load.audio('card_take', 'cardtake.flac');
+        this.load.audio('button_click', 'buttonclick.flac');
+        this.load.audio('fail', 'fail.flac');
 
         // ── Progress callback ─────────────────────────────────────────────
         this.load.on('progress', (value: number) => this.onProgress(value));

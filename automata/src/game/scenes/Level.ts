@@ -6,11 +6,12 @@ import { ActionZoneSystem } from '../util/ActionZoneSystem';
 import { LevelZoneScene } from './LevelZoneScene';
 import { LevelInfoScene } from './LevelInfoScene';
 import SceneNames from './SceneName';
-
+import { CardInfo } from "../types.ts";
+import { SoundScene } from "./SoundScene.ts";
 
 //TODO : create Take and Drop association (Need 1 Take for 1 Drop)
 //TODO : not drop when not the right Take
-export class Level extends Scene
+export abstract class Level extends Scene
 {
     protected cardScene: MovementCardsScene;
     protected levelZoneScene: LevelZoneScene | null = null;
@@ -26,11 +27,13 @@ export class Level extends Scene
     protected startX: number = 0;
     protected startY: number = 0;
 
-    constructor(levelName: string)
+    protected constructor(levelName: string)
     {
         super(levelName);
         this.actionZoneSystem = new ActionZoneSystem();
     }
+
+    protected abstract buildLevelDeckCards(): CardInfo[];
 
     /**
      * Required assets :
@@ -91,6 +94,7 @@ export class Level extends Scene
 
         // Initialize deck scene after assets are loaded
         this.deckScene = new DeckScene(this);
+        this.deckScene.setCards(this.buildLevelDeckCards());
 
         // Set up callback for when deck card is clicked
         this.deckScene.setOnCardClick((card) => this.drawNewCards(card));
@@ -98,10 +102,11 @@ export class Level extends Scene
         // Initialize movement cards scene
         this.cardScene = new MovementCardsScene(this);
 
-        this.cardScene.setOnCardReturnedToDeck((card) => {
+        this.cardScene.setOnCardReturnedToDeck( card => {
             this.deckScene.addCard(card);
             this.levelInfoScene?.addPenaltySeconds(10);
         });
+
     }
 
     update(time: number, delta: number)
@@ -116,9 +121,9 @@ export class Level extends Scene
      * Draw a card into the hand. If card data is provided (deck-mode), use it directly.
      * Otherwise fall back to a random card (for levels without a configured deck).
      */
-    protected drawNewCards(card: { type: CardType; speed: CardSpeed } | null) {
+    protected drawNewCards(card: CardInfo | null) {
         if (card) {
-            this.cardScene.addCardToHand(card.type, card.speed);
+            this.cardScene.addCardToHand(card.cardType, card.speed);
         } else {
             // Fallback: random card (for levels/scenes without a configured deck)
             const cardTypes = Object.values(CardType);
@@ -127,14 +132,6 @@ export class Level extends Scene
             const speed = Utils.Array.GetRandom(cardSpeeds) as CardSpeed;
             this.cardScene.addCardToHand(type, speed);
         }
-    }
-
-    /**
-     * Load a specific set of cards into the deck (shuffled by DeckScene).
-     * Call this in the level's create() to define the level-specific deck.
-     */
-    protected setupDeckCards(cards: Array<{ type: CardType; speed: CardSpeed }>): void {
-        this.deckScene.setCards(cards);
     }
 
     /**
@@ -227,7 +224,7 @@ export class Level extends Scene
 
         // Animate robot
         this.animateRobotMovement(direction);
-        this.scene.get(SceneNames.SoundScene).playRobotMovement();
+        this.scene.get<SoundScene>(SceneNames.SoundScene).playRobotMovement();
 
         return true;
     }

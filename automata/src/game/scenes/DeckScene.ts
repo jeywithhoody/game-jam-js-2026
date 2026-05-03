@@ -1,18 +1,16 @@
 import { Scene, GameObjects, Geom } from 'phaser';
-import { CardType, CardSpeed } from './MovementCardsScene';
-
-export type DrawnCard = { type: CardType; speed: CardSpeed };
+import { CardInfo } from "../types.ts";
 
 export class DeckScene {
     private scene: Scene;
     private deckContainer: GameObjects.Container;
     /** Cards loaded from a level-specific deck (shuffled). When set, these are the source of truth. */
-    private cards: DrawnCard[] = [];
-    private initialCards: DrawnCard[] = [];
+    private cards: CardInfo[] = [];
+    private initialCards: CardInfo[] = [];
     /** Fallback count used when no card data is provided (legacy / random-deck mode). */
     private fallbackCount: number = 30;
     private cardBackImage: string = 'card-back';
-    private onCardDraw: ((card: DrawnCard | null) => void) | null = null;
+    private onCardDraw: ((card: CardInfo | null) => void) | null = null;
 
     constructor(scene: Scene) {
         this.scene = scene;
@@ -23,7 +21,7 @@ export class DeckScene {
      * Load a specific set of cards into the deck and shuffle them.
      * Call this at level creation time to replace the default random deck.
      */
-    public setCards(cards: DrawnCard[]): void {
+    public setCards(cards: CardInfo[]): void {
         this.cards = [...cards];
         this.initialCards = [...cards];
         this.fallbackCount = 0;
@@ -47,7 +45,7 @@ export class DeckScene {
      * The card argument contains type/speed when the deck has card data,
      * or null in fallback (random) mode.
      */
-    public setOnCardClick(callback: (card: DrawnCard | null) => void) {
+    public setOnCardClick(callback: (card: CardInfo | null) => void) {
         this.onCardDraw = callback;
     }
 
@@ -127,7 +125,7 @@ export class DeckScene {
      * Returns the card data if the deck has card-mode data, null in fallback mode.
      * Returns undefined if the deck is empty.
      */
-    public drawCard(): DrawnCard | null | undefined {
+    public drawCard(): CardInfo | null | undefined {
         if (this.cards.length > 0) {
             const card = this.cards.pop()!;
             this.refreshDeckDisplay();
@@ -153,7 +151,7 @@ export class DeckScene {
     /**
      * Add a specific card back to the bottom of the deck (card-mode).
      */
-    public addCard(card: DrawnCard): void {
+    public addCard(card: CardInfo): void {
         this.cards.unshift(card);
         this.refreshDeckDisplay();
     }

@@ -5,6 +5,7 @@ import { LevelZoneScene } from "./LevelZoneScene";
 import { CardType, CardSpeed } from "./MovementCardsScene";
 import { Level1Metadata, LevelMetadata } from "../util/LevelMetadata";
 import { LevelInfoScene } from "./LevelInfoScene";
+import { CardInfo } from "../types.ts";
 
 /**
  * (Level1 : Lavomata )
@@ -45,59 +46,59 @@ export class Level1 extends Level {
    * - 3 Drop cards  (washer-put, dryer-put, folding-station)
    * - Movement cards covering all directions at speeds 1 & 2
    */
-  private buildLevel1Cards(): Array<{ type: CardType; speed: CardSpeed }> {
+  protected buildLevelDeckCards(): CardInfo[] {
     return [
       // Take cards (5 needed for each pick-up action)
-      { type: CardType.Take, speed: CardSpeed.One },
-      { type: CardType.Take, speed: CardSpeed.One },
-      { type: CardType.Take, speed: CardSpeed.One },
-      { type: CardType.Take, speed: CardSpeed.One },
-      { type: CardType.Take, speed: CardSpeed.One },
+      { cardType: CardType.Take, speed: CardSpeed.One },
+      { cardType: CardType.Take, speed: CardSpeed.One },
+      { cardType: CardType.Take, speed: CardSpeed.One },
+      { cardType: CardType.Take, speed: CardSpeed.One },
+      { cardType: CardType.Take, speed: CardSpeed.One },
 
       // Drop cards (3 needed for each put-down action)
-      { type: CardType.Drop, speed: CardSpeed.One },
-      { type: CardType.Drop, speed: CardSpeed.One },
-      { type: CardType.Drop, speed: CardSpeed.One },
+      { cardType: CardType.Drop, speed: CardSpeed.One },
+      { cardType: CardType.Drop, speed: CardSpeed.One },
+      { cardType: CardType.Drop, speed: CardSpeed.One },
 
       // Movement cards — Up
-      { type: CardType.MoveUp, speed: CardSpeed.One },
-      { type: CardType.MoveUp, speed: CardSpeed.One },
-      { type: CardType.MoveUp, speed: CardSpeed.One },
-      { type: CardType.MoveUp, speed: CardSpeed.One },
-      { type: CardType.MoveUp, speed: CardSpeed.Two },
-      { type: CardType.MoveUp, speed: CardSpeed.Two },
-      { type: CardType.MoveUp, speed: CardSpeed.Two },
-      { type: CardType.MoveUp, speed: CardSpeed.Two },
+      { cardType: CardType.MoveUp, speed: CardSpeed.One },
+      { cardType: CardType.MoveUp, speed: CardSpeed.One },
+      { cardType: CardType.MoveUp, speed: CardSpeed.One },
+      { cardType: CardType.MoveUp, speed: CardSpeed.One },
+      { cardType: CardType.MoveUp, speed: CardSpeed.Two },
+      { cardType: CardType.MoveUp, speed: CardSpeed.Two },
+      { cardType: CardType.MoveUp, speed: CardSpeed.Two },
+      { cardType: CardType.MoveUp, speed: CardSpeed.Two },
 
       // Movement cards — Down
-      { type: CardType.MoveDown, speed: CardSpeed.One },
-      { type: CardType.MoveDown, speed: CardSpeed.One },
-      { type: CardType.MoveDown, speed: CardSpeed.One },
-      { type: CardType.MoveDown, speed: CardSpeed.One },
-      { type: CardType.MoveDown, speed: CardSpeed.Two },
-      { type: CardType.MoveDown, speed: CardSpeed.Two },
-      { type: CardType.MoveDown, speed: CardSpeed.Two },
-      { type: CardType.MoveDown, speed: CardSpeed.Two },
+      { cardType: CardType.MoveDown, speed: CardSpeed.One },
+      { cardType: CardType.MoveDown, speed: CardSpeed.One },
+      { cardType: CardType.MoveDown, speed: CardSpeed.One },
+      { cardType: CardType.MoveDown, speed: CardSpeed.One },
+      { cardType: CardType.MoveDown, speed: CardSpeed.Two },
+      { cardType: CardType.MoveDown, speed: CardSpeed.Two },
+      { cardType: CardType.MoveDown, speed: CardSpeed.Two },
+      { cardType: CardType.MoveDown, speed: CardSpeed.Two },
 
       // Movement cards — Left
-      { type: CardType.MoveLeft, speed: CardSpeed.One },
-      { type: CardType.MoveLeft, speed: CardSpeed.One },
-      { type: CardType.MoveLeft, speed: CardSpeed.One },
-      { type: CardType.MoveLeft, speed: CardSpeed.One },
-      { type: CardType.MoveLeft, speed: CardSpeed.Two },
-      { type: CardType.MoveLeft, speed: CardSpeed.Two },
-      { type: CardType.MoveLeft, speed: CardSpeed.Two },
-      { type: CardType.MoveLeft, speed: CardSpeed.Two },
+      { cardType: CardType.MoveLeft, speed: CardSpeed.One },
+      { cardType: CardType.MoveLeft, speed: CardSpeed.One },
+      { cardType: CardType.MoveLeft, speed: CardSpeed.One },
+      { cardType: CardType.MoveLeft, speed: CardSpeed.One },
+      { cardType: CardType.MoveLeft, speed: CardSpeed.Two },
+      { cardType: CardType.MoveLeft, speed: CardSpeed.Two },
+      { cardType: CardType.MoveLeft, speed: CardSpeed.Two },
+      { cardType: CardType.MoveLeft, speed: CardSpeed.Two },
 
       // Movement cards — Right
-      { type: CardType.MoveRight, speed: CardSpeed.One },
-      { type: CardType.MoveRight, speed: CardSpeed.One },
-      { type: CardType.MoveRight, speed: CardSpeed.One },
-      { type: CardType.MoveRight, speed: CardSpeed.One },
-      { type: CardType.MoveRight, speed: CardSpeed.Two },
-      { type: CardType.MoveRight, speed: CardSpeed.Two },
-      { type: CardType.MoveRight, speed: CardSpeed.Two },
-      { type: CardType.MoveRight, speed: CardSpeed.Two },
+      { cardType: CardType.MoveRight, speed: CardSpeed.One },
+      { cardType: CardType.MoveRight, speed: CardSpeed.One },
+      { cardType: CardType.MoveRight, speed: CardSpeed.One },
+      { cardType: CardType.MoveRight, speed: CardSpeed.One },
+      { cardType: CardType.MoveRight, speed: CardSpeed.Two },
+      { cardType: CardType.MoveRight, speed: CardSpeed.Two },
+      { cardType: CardType.MoveRight, speed: CardSpeed.Two },
+      { cardType: CardType.MoveRight, speed: CardSpeed.Two },
     ];
   }
 
@@ -141,9 +142,6 @@ export class Level1 extends Level {
       this.levelZoneScene!.getContainer().add(sprite); // Add washer to container
     });
     this.levelZoneScene!.getContainer().add(this.robotSprite); // Add robot above washer
-
-    // Hand the Level 1 card list to DeckScene — it will shuffle them
-    this.setupDeckCards(this.buildLevel1Cards());
 
     // Set up card play callback for individual card clicks
     this.cardScene.onCardPlay((cardType, cardSpeed, cardIndex) => {
@@ -432,7 +430,7 @@ export class Level1 extends Level {
    * Execute a sequence of cards (from Go button)
    */
   private async executeCardSequence(
-    cards: Array<{ type: CardType; speed: CardSpeed }>,
+    cards: CardInfo[],
   ): Promise<void> {
     if (this.isExecutingSequence) {
       console.log("Already executing a sequence");
@@ -444,9 +442,9 @@ export class Level1 extends Level {
 
     for (let i = 0; i < cards.length; i++) {
       const card = cards[i];
-      console.log(`Executing card ${i + 1}/${cards.length}: ${card.type}`);
+      console.log(`Executing card ${i + 1}/${cards.length}: ${card.cardType}`);
 
-      const success = this.playCard(card.type, card.speed);
+      const success = this.playCard(card.cardType, card.speed);
 
       if (!success) {
         console.log(`Card ${i + 1} failed, stopping sequence`);

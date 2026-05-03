@@ -19,20 +19,6 @@ export class SoundScene extends Scene {
         super(SceneName.SoundScene);
     }
 
-    preload() {
-        this.load.setPath('assets');
-        this.load.audio('music_theme', 'suno_ai_moots_cardbot_drift.mp3');
-        this.load.audio('robot_sound', 'robot_move.flac');
-        this.load.audio('robot_move', 'robotmoveshort.flac');
-        this.load.audio('machine_sound', 'washingmachineshort.flac');
-        this.load.audio('water_splash', 'watersplash.flac');
-        this.load.audio('physical_task', 'physicaltasks.flac');
-        this.load.audio('level_win', 'levelwin.flac');
-        this.load.audio('card_take', 'cardtake.flac');
-        this.load.audio('button_click', 'buttonclick.flac');
-        this.load.audio('fail', 'fail.flac');
-    }
-
     create() {
         this.playMusec();
     }
