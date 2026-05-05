@@ -15,7 +15,7 @@ export class LevelSelectScene extends Scene {
     private levels: LevelOption[] = [
         {
             name: 'Level 1: Lavomata',
-            sceneName: SceneNames.Level1,
+            sceneName: SceneNames.Introduction,
             description: 'Sort and wash the laundry'
         },
         {

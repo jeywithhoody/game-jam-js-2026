@@ -34,6 +34,7 @@ export abstract class Level extends Scene
     }
 
     protected abstract buildLevelDeckCards(): CardInfo[];
+    protected abstract createLevelGrid(): LevelGrid;
 
     /**
      * Required assets :
@@ -106,6 +107,8 @@ export abstract class Level extends Scene
             this.deckScene.addCard(card);
             this.levelInfoScene?.addPenaltySeconds(10);
         });
+
+        this.levelGrid = this.createLevelGrid();
 
     }
 

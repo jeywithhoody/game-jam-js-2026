@@ -8,6 +8,7 @@ import { PauseMenuScene } from './scenes/PauseMenuScene';
 import { SoundScene } from './scenes/SoundScene';
 import { SettingsScene } from './scenes/SettingsScene';
 import { AUTO, Game, Scale,Types } from 'phaser';
+import { LevelIntroScene } from './scenes/IntroScene';
 
 // Find out more information about the Game Config at:
 // https://docs.phaser.io/api-documentation/typedef/types-core#gameconfig
@@ -25,6 +26,7 @@ const config: Types.Core.GameConfig = {
         LoadingScene,
         StartScene,
         LevelSelectScene,
+        LevelIntroScene,
         Level1,
         Level2,
         LevelInfoScene,
